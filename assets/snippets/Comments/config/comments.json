@@ -1,0 +1,9 @@
+{
+  "wrapTpl": "@T_FILE:TreeView/wrap",
+  "tpl": "@T_FILE:TreeView/comment",
+  "rtssElement": "TreeViewComments",
+  "userType": "user",
+  "userFields": "createdby,updatedby,deletedby",
+  "disableGuests": 1,
+  "moderatedByTopicStarter": 1
+}

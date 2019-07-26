@@ -1,0 +1,35 @@
+{
+  "formTpl": "@FILE:Moderation/form",
+  "guestFormTpl": "@FILE:Moderation/guestForm",
+  "disableSubmit": 1,
+  "rules": {
+    "comment": {
+      "required": "Введите текст комментария"
+    }
+  },
+  "guestRules": {
+    "name": {
+      "required":"Введите ваше имя"
+    },
+    "email": {
+      "required": "Введите e-mail",
+      "email": "Введите e-mail правильно"
+    },
+    "comment": {
+      "required": "Введите текст комментария"
+    }
+  },
+  "errorClass": " is-invalid",
+  "requiredClass": " is-invalid",
+  "errorTpl" : "@CODE:<div class=\"invalid-feedback\">[+message+]</div>",
+  "filters": {
+    "name":["trim", "ucfirst", "removeExtraSpaces", "stripTags"],
+    "email":["trim", "email"],
+    "comment": ["trim", "compressText"]
+  },
+  "formControls": ["published", "deleted"],
+  "emptyFormControls": {
+      "published": 0,
+      "deleted": 0
+  }
+}

@@ -1,0 +1,99 @@
+.comment-reply-cancel, #comments .comment-update {
+    display:none;
+}
+#comments .comment-form-wrap {
+    margin-bottom:15px;
+}
+#comments .comments-count-wrap {
+    font-size:2em;
+    margin-bottom:20px;
+}
+#comments .comment {
+    margin-left:100px;
+    margin-bottom:15px;
+}
+#comments .comment .comment-wrap, .comment-preview-wrap {
+    padding:15px;
+    border:1px dotted #bbb;
+    border-radius:4px;
+}
+#comments .comment.unpublished .comment-wrap {
+    background: #f8dd84;
+}
+#comments .comment.deleted .comment-wrap {
+    background: #f4e1df;
+}
+#comments .comment-preview-wrap {
+    background:#ccc;
+    margin:15px 0;
+}
+#comments .level0 {
+    margin-left:0px;
+}
+#comments .level1 {
+    margin-left:20px;
+}
+#comments .level2 {
+    margin-left:40px;
+}
+#comments .level3 {
+    margin-left:60px;
+}
+#comments .level4 {
+    margin-left:80px;
+}
+#comments .comment .comment-head {
+    background:#eee;
+    padding:5px 10px;
+}
+#comments .comment .comment-body {
+    padding:15px 0;
+}
+#comments .comment.anonymous .comment-head {
+    background:#f0ffff;
+}
+#comments .comment-reply-cancel {
+    display:inline-block;
+}
+#comments .comment-preview-wrap {
+    background: #ccc;
+    margin: 15px 0;
+}
+#comments .comment.editable .comment-update {
+    display:inline-block;
+}
+#comments .comment-moderation {
+    margin-bottom:15px;
+}
+#comments .comment-moderation .comment-undelete,
+#comments .comment.published .comment-moderation .comment-publish,
+#comments .comment.unpublished .comment-moderation .comment-unpublish,
+#comments .comment.deleted .comment-moderation .comment-delete{
+    display:none;
+}
+#comments .comment.deleted .comment-moderation .comment-undelete{
+    display:inline-block;
+}
+.recent-comments {
+    padding:15px;
+    margin-bottom:15px;
+}
+.recent-comment {
+    margin-bottom:15px;
+}
+.recent-comment .username {
+    font-weight: bold;
+}
+.comments-form-wrap form {
+    position:relative;
+}
+.comments-form-wrap form.disabled:before {
+    content:"";
+    display:block;
+    position:absolute;
+    top:0;
+    right:0;
+    bottom:0;
+    left:0;
+    background:rgba(255,255,255,.4);
+}

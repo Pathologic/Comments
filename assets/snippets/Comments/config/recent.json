@@ -1,0 +1,7 @@
+{
+  "display": 10,
+  "tpl": "@T_FILE:recent",
+  "introField": "",
+  "contentField": "content",
+  "summary": "notags,len:150"
+}

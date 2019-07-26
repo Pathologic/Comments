@@ -766,6 +766,7 @@ class Comments extends autoTable
             ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
+        $this->query("ALTER TABLE {$this->makeTable('system_eventnames')} ADD UNIQUE INDEX `name`(`name`)");
         $this->query("
             INSERT INTO {$this->makeTable('system_eventnames')} (`name`, `groupname`) VALUES 
             ('OnBeforeCommentSave', 'Comments Events'),
@@ -780,6 +781,7 @@ class Comments extends autoTable
             ('OnCommentsRemove', 'Comments Events')
         ");
         $this->stat->createTable();
+        \RuntimeSharedSettings::getInstance($this->modx)->createTable();
     }
 
 }

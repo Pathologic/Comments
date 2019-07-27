@@ -26,9 +26,9 @@ class Actions
     protected $result = array();
     public $formConfigOverride = array(
         'disableSubmit' => 0,
-        'api' => 2,
-        'apiFormat' => 'array',
-        'rtssElement' => ''
+        'api'           => 2,
+        'apiFormat'     => 'array',
+        'rtssElement'   => ''
     );
 
     /**
@@ -210,7 +210,7 @@ class Actions
                 $data = new Comments($this->modx);
                 $status = $data->publish($this->id, true, true) !== false;
                 $messages = $data->getMessages();
-                if (!$status && empty($messages)) {
+                if ($status === false && empty($messages)) {
                     $messages = $this->lexicon->get('actions.error_update');
                 }
                 $stat = Stat::getInstance($this->modx)->getStat($this->thread, $this->context);
@@ -237,7 +237,7 @@ class Actions
                 $data = new Comments($this->modx);
                 $status = $data->unpublish($this->id, true, true) !== false;
                 $messages = $data->getMessages();
-                if (!$status && empty($messages)) {
+                if ($status === false && empty($messages)) {
                     $messages = $this->lexicon->get('actions.error_update');
                 }
                 $stat = Stat::getInstance($this->modx)->getStat($this->thread, $this->context);
@@ -262,7 +262,7 @@ class Actions
                 $data = new Comments($this->modx);
                 $status = $data->delete($this->id, true, true) !== false;
                 $messages = $data->getMessages();
-                if (!$status && empty($messages)) {
+                if ($status === false && empty($messages)) {
                     $messages = $this->lexicon->get('actions.error_update');
                 }
                 $stat = Stat::getInstance($this->modx)->getStat($this->thread, $this->context);
@@ -287,7 +287,7 @@ class Actions
                 $data = new Comments($this->modx);
                 $status = $data->undelete($this->id, true, true) !== false;
                 $messages = $data->getMessages();
-                if (!$status && empty($messages)) {
+                if ($status === false && empty($messages)) {
                     $messages = $this->lexicon->get('actions.error_update');
                 }
                 $stat = Stat::getInstance($this->modx)->getStat($this->thread, $this->context);
@@ -312,7 +312,7 @@ class Actions
                 $data = new Comments($this->modx);
                 $status = $data->remove($this->id, true, true) !== false;
                 $messages = $data->getMessages();
-                if (!$status && empty($messages)) {
+                if ($status === false && empty($messages)) {
                     $messages = $this->lexicon->get('actions.error_remove');
                 }
                 $stat = Stat::getInstance($this->modx)->getStat($this->thread, $this->context);

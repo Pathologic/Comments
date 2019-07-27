@@ -26,6 +26,14 @@ class CommentPreview extends Core {
     }
 
     /**
+     * @return bool
+     */
+    public function isSubmitted ()
+    {
+        return true;
+    }
+
+    /**
      * Обработка формы, определяется контроллерами
      *
      * @return mixed

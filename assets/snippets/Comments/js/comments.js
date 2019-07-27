@@ -477,7 +477,7 @@
                     if (response.status) {
                         var preview = $('<div/>', {
                             html: response.fields.content,
-                            class: self._options.previewWrapper
+                            class: self._options.previewWrapperClass
                         });
                         $(self._options.formWrapper).append(preview);
                     } else {

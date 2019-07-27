@@ -16,6 +16,7 @@
     padding:15px;
     border:1px dotted #bbb;
     border-radius:4px;
+    margin-top:15px;
 }
 #comments .comment.unpublished .comment-wrap {
     background: #f8dd84;

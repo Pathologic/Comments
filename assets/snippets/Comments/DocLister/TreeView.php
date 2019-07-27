@@ -114,7 +114,6 @@ class TreeViewDocLister extends DocLister
         if ($this->mode == 'comments') {
             $this->saveSettings();
         }
-        $this->saveSettings();
     }
 
     protected function saveSettings ()

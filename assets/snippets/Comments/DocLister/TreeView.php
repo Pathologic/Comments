@@ -371,7 +371,7 @@ class TreeViewDocLister extends DocLister
      */
     protected function getDocList ()
     {
-        $out = $this->extCache->load('comments_data' . $this->isModerator() ? '_moderation' : '');
+        $out = $this->extCache->load('comments_data' . ($this->isModerator() ? '_moderation' : ''));
         if ($out === false) {
             $thread = $this->sanitarIn($this->IDs);
             $hideUnpublished = $this->getCFGDef('hideUnpublished', 1) && !$this->isModerator();
@@ -413,7 +413,7 @@ class TreeViewDocLister extends DocLister
             }
             $this->fixGaps();
             $this->order = $this->buildFlatTree();
-            $this->extCache->save($this->_docs, 'comments_data' . $this->isModerator() ? '_moderation' : '');
+            $this->extCache->save($this->_docs, 'comments_data' . ($this->isModerator() ? '_moderation' : ''));
             $this->extCache->save($this->relations, 'comments_relations');
             $this->extCache->save($this->order, 'comments_order');
         } else {

@@ -413,7 +413,7 @@ class TreeViewDocLister extends DocLister
             }
             $this->fixGaps();
             $this->order = $this->buildFlatTree();
-            $this->extCache->save($this->_docs, 'comments_data');
+            $this->extCache->save($this->_docs, 'comments_data' . $this->isModerator() ? '_moderation' : '');
             $this->extCache->save($this->relations, 'comments_relations');
             $this->extCache->save($this->order, 'comments_order');
         } else {

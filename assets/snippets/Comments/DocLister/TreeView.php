@@ -128,12 +128,14 @@ class TreeViewDocLister extends DocLister
 
     protected function initModeration ()
     {
-        $this->moderation = new Moderation($this->modx, array(
-            'moderatedByThreadCreator' => $this->getCFGDef('moderatedByThreadCreator', 0),
-            'threadCreatorField'       => $this->getCFGDef('threadCreatorField', 'aid'),
-            'contextModel'             => $this->getCFGDef('contextModel', '\\modResource'),
-            'thread'                   => $this->getCFGDef('thread')
-        ));
+        if (!$this->getCFGDef('disableModeration', 0)) {
+            $this->moderation = new Moderation($this->modx, array(
+                'moderatedByThreadCreator' => $this->getCFGDef('moderatedByThreadCreator', 0),
+                'threadCreatorField'       => $this->getCFGDef('threadCreatorField', 'aid'),
+                'contextModel'             => $this->getCFGDef('contextModel', '\\modResource'),
+                'thread'                   => $this->getCFGDef('thread')
+            ));
+        }
     }
 
     /**

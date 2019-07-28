@@ -64,7 +64,7 @@ class Comments extends Core
     {
         $rtss = RuntimeSharedSettings::getInstance($this->getMODX());
         $rtss->save(
-            $this->getCFGDef('rtssElement', 'CommentsForm') . $this->getCFGDef('thread', 0),
+            $this->getCFGDef('rtssElement', 'CommentsForm'),
             $this->getCFGDef('context', 'site_content'),
             $this->config->getConfig()
         );

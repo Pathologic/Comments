@@ -31,5 +31,8 @@
   "emptyFormControls": {
       "published": 0,
       "deleted": 0
-  }
+  },
+  "moderatedByThreadCreator": 1,
+  "contextModel": "\\modResource",
+  "threadCreatorField": "aid"
 }

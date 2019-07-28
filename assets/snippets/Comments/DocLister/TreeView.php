@@ -120,7 +120,7 @@ class TreeViewDocLister extends DocLister
     {
         $rtss = RuntimeSharedSettings::getInstance($this->getMODX());
         $rtss->save(
-            $this->getCFGDef('rtssElement', 'TreeViewComments') . $this->getCFGDef('thread'),
+            $this->getCFGDef('rtssElement', 'TreeViewComments'),
             $this->getContext(),
             $this->config->getConfig()
         );
@@ -130,7 +130,9 @@ class TreeViewDocLister extends DocLister
     {
         $this->moderation = new Moderation($this->modx, array(
             'moderatedByThreadCreator' => $this->getCFGDef('moderatedByThreadCreator', 0),
-            'threadCreator' => $this->getCFGDef('threadCreator', 0)
+            'threadCreatorField'       => $this->getCFGDef('threadCreatorField', 'aid'),
+            'contextModel'             => $this->getCFGDef('contextModel', '\\modResource'),
+            'thread'                   => $this->getCFGDef('thread')
         ));
     }
 
@@ -324,7 +326,6 @@ class TreeViewDocLister extends DocLister
     public function getClasses ($item)
     {
         $classes = array();
-        $topicStarter = (int)$this->getCFGDef('topicStarter', 0);
         $classes[] = $item['published'] ? $this->getCFGDef('publishedClass',
             'published') : $this->getCFGDef('unpublishedClass', 'unpublished');
         if ($item['deleted']) {
@@ -335,7 +336,7 @@ class TreeViewDocLister extends DocLister
         }
         if (!$item['createdby']) {
             $classes[] = $this->getCFGDef('anonymousClass', 'anonymous');
-        } elseif ($topicStarter && $item['createdby'] == $topicStarter) {
+        } elseif ($this->isThreadCreator($item['createdby'])) {
             $classes[] = $this->getCFGDef('authorClass', 'author');
         }
 
@@ -513,6 +514,15 @@ class TreeViewDocLister extends DocLister
     public function hasPermission ($permission = '')
     {
         return !is_null($this->moderation) && $this->moderation->hasPermission($permission);
+    }
+
+    /**
+     * @param int $uid
+     * @return bool
+     */
+    public function isThreadCreator ($uid = 0)
+    {
+        return !is_null($this->moderation) && $this->moderation->isThreadCreator($uid);
     }
 
     /**

@@ -5,5 +5,7 @@
   "userType": "user",
   "userFields": "createdby,updatedby,deletedby",
   "disableGuests": 1,
-  "moderatedByTopicStarter": 1
+  "moderatedByThreadCreator": 1,
+  "contextModel": "\\modResource",
+  "threadCreatorField": "aid"
 }

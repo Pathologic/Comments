@@ -35,9 +35,18 @@ class Moderation extends Core
         if ($id = $this->getCFGDef('id', 0)) {
             $this->comments->edit($id);
         }
+        $this->initModeration();
+    }
+
+    /**
+     *
+     */
+    public function initModeration() {
         $this->moderation = new CommentsModeration($this->modx, array(
             'moderatedByThreadCreator' => $this->getCFGDef('moderatedByThreadCreator', 0),
-            'threadCreator'            => $this->getCFGDef('threadCreator', 0)
+            'threadCreatorField'       => $this->getCFGDef('threadCreatorField', 'aid'),
+            'contextModel'             => $this->getCFGDef('contextModel', '\\modResource'),
+            'thread'                   => $this->comments->get('thread')
         ));
     }
 

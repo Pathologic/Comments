@@ -10,6 +10,7 @@ use Helpers\Config;
 class Moderation
 {
     protected $modx = null;
+    protected $data = null;
     protected $cfg = array();
 
     /**
@@ -20,6 +21,9 @@ class Moderation
     {
         $this->modx = $modx;
         $this->cfg = new Config($cfg);
+        if ($this->modx->getLoginUserID('web')) {
+            $this->loadModel();
+        }
     }
 
     /**
@@ -28,17 +32,14 @@ class Moderation
      */
     public function isModerator ()
     {
-        $uid = $this->modx->getLoginUserID('web');
         $hasPermission = $this->hasPermission('comments_publish') ||
             $this->hasPermission('comments_unpublish') ||
             $this->hasPermission('comments_delete') ||
             $this->hasPermission('comments_undelete') ||
             $this->hasPermission('comments_remove') ||
             $this->hasPermission('comments_edit');
-        $moderatedByThreadCreator = $this->getCFGDef('moderatedByThreadCreator', 0);
-        $threadCreator = $this->getCFGDef('threadCreator', 0);
 
-        return $uid && ($hasPermission || ($moderatedByThreadCreator && $uid == $threadCreator));
+        return $hasPermission || ($this->getCFGDef('moderatedByThreadCreator', 1) && $this->isThreadCreator());
     }
 
     /**
@@ -47,15 +48,39 @@ class Moderation
      */
     public function hasPermission ($permission = '')
     {
-        $uid = $this->modx->getLoginUserID('web');
-        $moderatedByThreadCreator = $this->getCFGDef('moderatedByThreadCreator', 0);
-        $threadCreator = $this->getCFGDef('threadCreator', 0);
-        $out = $moderatedByThreadCreator && $uid == $threadCreator;
+        $out = $this->isThreadCreator();
         if (!$out && !empty($_SESSION['usrPermissions']) && is_array($_SESSION['usrPermissions'])) {
             $out = in_array($permission, $_SESSION['usrPermissions']);
         }
 
         return $out;
+    }
+
+    /**
+     * @param int $uid
+     * @return bool
+     */
+    public function isThreadCreator($uid = 0) {
+        $out = false;
+        if ($uid && is_null($this->data)) {
+            $this->loadModel();
+        }
+        $uid = $uid ? $uid : $this->modx->getLoginUserID('web');
+        if (!is_null($this->data)) {
+            $creator = (int)$this->data->get($this->getCFGDef('threadCreatorField', 'aid'));
+            $out = $uid && $uid == $creator;
+        }
+
+        return $out;
+    }
+
+    protected function loadModel() {
+        $model = $this->getCFGDef('contextModel', '\\modResource');
+        $thread = (int)$this->getCFGDef('thread');
+        if ($model && $thread && class_exists($model)) {
+            $this->data = new $model($this->modx);
+            $this->data->edit($thread);
+        }
     }
 
     /**

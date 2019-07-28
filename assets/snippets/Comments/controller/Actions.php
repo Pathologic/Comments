@@ -58,18 +58,24 @@ class Actions
     {
         $ah = RuntimeSharedSettings::getInstance($this->modx);
         $out = true;
-        $config = $ah->load($this->ahFormElement . $this->thread, $this->context);
+        $config = $ah->load($this->ahFormElement, $this->context);
         $this->formConfig = new Config($config);
         $out = $out && !empty($config);
-        $config = $ah->load($this->ahCommentsElement . $this->thread, $this->context);
+        $config = $ah->load($this->ahCommentsElement, $this->context);
         $this->commentsConfig = new Config($config);
         $out = $out && !empty($config);
-        $this->moderation = new Moderation($this->modx, array(
-            'moderatedByThreadCreator' => $this->getCFGDef('comments', 'moderatedByThreadCreator', 0),
-            'threadCreator'            => $this->getCFGDef('comments', 'threadCreator', 0)
-        ));
+        $this->initModeration();
 
         return $out;
+    }
+
+    protected function initModeration() {
+        $this->moderation = new Moderation($this->modx, array(
+            'moderatedByThreadCreator' => $this->getCFGDef('comments', 'moderatedByThreadCreator', 1),
+            'threadCreatorField'       => $this->getCFGDef('comments', 'threadCreatorField', 'aid'),
+            'contextModel'             => $this->getCFGDef('comments', 'contextModel', '\\modResource'),
+            'thread'                   => $this->thread
+        ));
     }
 
     /*
@@ -144,8 +150,6 @@ class Actions
             $cfg['templateExtension'] = 'tpl';
             $cfg['controller'] = 'Moderation';
             $cfg['id'] = $this->id;
-            $cfg['moderatedByThreadCreator'] = $this->getCFGDef('comments', 'moderatedByThreadCreator', 0);
-            $cfg['threadCreator'] = $this->getCFGDef('comments', 'threadCreator', 0);
             $this->setResult($this->modx->runSnippet(
                 'FormLister',
                 array_merge(
@@ -207,7 +211,7 @@ class Actions
     {
         if ($this->thread && $this->id) {
             if ($this->moderation->hasPermission('comments_publish')) {
-                $data = new Comments($this->modx);
+                $data = $this->getModel();
                 $status = $data->publish($this->id, true, true) !== false;
                 $messages = $data->getMessages();
                 if ($status === false && empty($messages)) {
@@ -234,7 +238,7 @@ class Actions
     {
         if ($this->thread && $this->id) {
             if ($this->moderation->hasPermission('comments_unpublish')) {
-                $data = new Comments($this->modx);
+                $data = $this->getModel();
                 $status = $data->unpublish($this->id, true, true) !== false;
                 $messages = $data->getMessages();
                 if ($status === false && empty($messages)) {
@@ -259,7 +263,7 @@ class Actions
     {
         if ($this->thread && $this->id) {
             if ($this->moderation->hasPermission('comments_delete')) {
-                $data = new Comments($this->modx);
+                $data = $this->getModel();
                 $status = $data->delete($this->id, true, true) !== false;
                 $messages = $data->getMessages();
                 if ($status === false && empty($messages)) {
@@ -284,7 +288,7 @@ class Actions
     {
         if ($this->thread && $this->id) {
             if ($this->moderation->hasPermission('comments_undelete')) {
-                $data = new Comments($this->modx);
+                $data = $this->getModel();
                 $status = $data->undelete($this->id, true, true) !== false;
                 $messages = $data->getMessages();
                 if ($status === false && empty($messages)) {
@@ -309,7 +313,7 @@ class Actions
     {
         if ($this->thread && $this->id) {
             if ($this->moderation->hasPermission('comments_remove')) {
-                $data = new Comments($this->modx);
+                $data = $this->getModel();
                 $status = $data->remove($this->id, true, true) !== false;
                 $messages = $data->getMessages();
                 if ($status === false && empty($messages)) {
@@ -325,6 +329,15 @@ class Actions
         } else {
             $this->setResult(false, $this->lexicon->get('actions.error_remove'));
         }
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getModel() {
+        $model = $this->getCFGDef('form', 'model', 'Comments\\Comments');
+        
+        return new $model($this->modx);
     }
 
     /**

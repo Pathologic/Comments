@@ -5,6 +5,7 @@ use Exception;
 use autoTable;
 use Doctrine\Common\Cache\Cache;
 use DocumentParser;
+
 /**
  * Class Tree
  * @package Comments
@@ -158,10 +159,6 @@ class Comments extends autoTable
      */
     public function set ($key, $value)
     {
-        $ignored = array('thread', 'parent', 'context');
-        if (!$this->newDoc && in_array($key, $ignored)) {
-            return $this;
-        }
         if ($key == 'comment') {
             $key = 'rawcontent';
         }
@@ -222,6 +219,12 @@ class Comments extends autoTable
      */
     public function save ($fire_events = false, $clearCache = false)
     {
+        if (!$this->newDoc) {
+            $ignored = array('thread', 'parent', 'context');
+            foreach ($ignored as $key) {
+                $this->rollback($key);
+            }
+        }
         $mode = $this->newDoc ? 'create' : 'update';
         $thread = $this->get('thread');
         $context = $this->get('context');
@@ -229,7 +232,7 @@ class Comments extends autoTable
             $this->set('updatedon', date('Y-m-d H:i:s', $this->getTime(time())));
             $this->set('updatedby', $this->modx->getLoginUserID('web'));
             $result = $this->getInvokeEventResult('OnBeforeCommentSave', [
-                'mode' => $mode,
+                'mode'    => $mode,
                 'comment' => $this
             ], $fire_events);
             if ($this->isChanged('rawcontent') && !$this->isChanged('content')) {
@@ -255,7 +258,7 @@ class Comments extends autoTable
             $this->set('createdby', $this->modx->getLoginUserID('web'));
             $parent = (int)$this->get('parent');
             $result = $this->getInvokeEventResult('OnBeforeCommentSave', [
-                'mode' => $mode,
+                'mode'    => $mode,
                 'comment' => $this
             ], $fire_events);
             if (empty($this->get('content'))) {
@@ -273,7 +276,7 @@ class Comments extends autoTable
         }
         if ($out) {
             $result = $this->getInvokeEventResult('OnCommentSave', [
-                'mode' => $mode,
+                'mode'    => $mode,
                 'comment' => $this
             ], $fire_events);
             if (!empty($result)) {
@@ -294,7 +297,7 @@ class Comments extends autoTable
     public function preview ($fire_events = true)
     {
         $this->invokeEvent('OnBeforeCommentSave', [
-            'mode' => 'preview',
+            'mode'    => 'preview',
             'comment' => $this
         ], $fire_events);
         if (empty($this->get('content'))) {
@@ -348,7 +351,8 @@ class Comments extends autoTable
      * @return bool|int
      * @throws Exception
      */
-    public function undelete($ids, $fire_events = false, $clearCache = false) {
+    public function undelete ($ids, $fire_events = false, $clearCache = false)
+    {
         $out = false;
         $_ids = $this->cleanIDs($ids, ',');
         if (is_array($_ids) && !empty($_ids)) {
@@ -384,7 +388,8 @@ class Comments extends autoTable
      * @return bool|int
      * @throws Exception
      */
-    public function publish($ids, $fire_events = false, $clearCache = false) {
+    public function publish ($ids, $fire_events = false, $clearCache = false)
+    {
         $out = false;
         $_ids = $this->cleanIDs($ids, ',');
         if (is_array($_ids) && !empty($_ids)) {
@@ -419,7 +424,8 @@ class Comments extends autoTable
      * @return bool|int
      * @throws Exception
      */
-    public function unpublish($ids, $fire_events = false, $clearCache = false) {
+    public function unpublish ($ids, $fire_events = false, $clearCache = false)
+    {
         $out = false;
         $_ids = $this->cleanIDs($ids, ',');
         if (is_array($_ids) && !empty($_ids)) {
@@ -454,7 +460,8 @@ class Comments extends autoTable
      * @return bool|int
      * @throws Exception
      */
-    public function remove($ids, $fire_events = false, $clearCache = false) {
+    public function remove ($ids, $fire_events = false, $clearCache = false)
+    {
         $out = false;
         $_ids = $this->cleanIDs($ids, ',');
         $update = array();
@@ -486,7 +493,8 @@ class Comments extends autoTable
                                 $this->addMessages($result);
                             }
                             foreach ($update as $row) {
-                                $this->stat->updateLastComment($row['thread'], $row['context'])->updateCommentsCount($row['thread'], $row['context']);
+                                $this->stat->updateLastComment($row['thread'],
+                                    $row['context'])->updateCommentsCount($row['thread'], $row['context']);
                                 if ($clearCache) {
                                     $this->dropCache($row['thread'], $row['context']);
                                 }
@@ -509,12 +517,14 @@ class Comments extends autoTable
      * @param $ids
      * @return $this
      */
-    protected function updateStat($ids, $clearCache = false) {
+    protected function updateStat ($ids, $clearCache = false)
+    {
         $id = $this->sanitarIn($ids);
         if ($id) {
             $q = $this->query("SELECT DISTINCT `thread`, `context` FROM {$this->makeTable($this->table)} WHERE `id` IN ($id)");
             while ($row = $this->modx->db->getRow($q)) {
-                $this->stat->updateLastComment($row['thread'], $row['context'])->updateCommentsCount($row['thread'], $row['context']);
+                $this->stat->updateLastComment($row['thread'], $row['context'])->updateCommentsCount($row['thread'],
+                    $row['context']);
                 if ($clearCache) {
                     $this->dropCache($row['thread'], $row['context']);
                 }
@@ -523,7 +533,7 @@ class Comments extends autoTable
                 $this->dropCache();
             }
         }
-        
+
         return $this;
     }
 
@@ -531,7 +541,8 @@ class Comments extends autoTable
      * Удаляет комментарии с нарушенными связями
      * @throws Exception
      */
-    public function removeLostComments() {
+    public function removeLostComments ()
+    {
         $q = $this->query("SELECT `idAncestor` FROM `modx_comments_tree` LEFT JOIN `modx_comments` ON `idNearestAncestor` = `id` WHERE `idNearestAncestor` > 0 AND iSNULL(`id`)");
         $ids = $this->modx->db->getColumn('idAncestor', $q);
         if ($ids) {
@@ -622,7 +633,8 @@ class Comments extends autoTable
      * @return array
      * @throws Exception
      */
-    public function getChildren($ids) {
+    public function getChildren ($ids)
+    {
         $out = array();
         $_ids = $this->cleanIDs($ids, ',');
         if (is_array($_ids) && !empty($_ids)) {
@@ -693,7 +705,8 @@ class Comments extends autoTable
      * @param string $context
      * @return Comments
      */
-    public function dropCache($thread = 0, $context = ''){
+    public function dropCache ($thread = 0, $context = '')
+    {
         if (isset($this->modx->cache) && ($this->modx->cache instanceof Cache)) {
             if ($thread && $context) {
                 $key = $context . '_' . $thread . '_comments_data';

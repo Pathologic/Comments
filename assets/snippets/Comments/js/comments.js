@@ -26,12 +26,18 @@
             previewBtnClass: 'comment-preview',
             editableClass: 'editable',
             formDisabledClass: 'disabled',
-            serverErrorMessage: 'Ошибка сервера: ',
-            parseErrorMessage: 'Не удалось обработать ответ сервера',
+
             thread: 0,
             lastComment: 0,
             notifyOptions: {},
-            notyfyTimeout: 1000
+            notyfyTimeout: 1000,
+            lexicon: {
+                server_error: 'Ошибка сервера: ',
+                parse_error: 'Не удалось обработать ответ сервера',
+                yes: 'Да',
+                no: 'Нет',
+                remove_confirm: 'Комментарий и все ответы на него будут безвозвратно удалены. Продолжить?'
+            }
         };
         this._options = $.extend({}, defaults, options);
         this._options = $.extend(this._options, {
@@ -55,6 +61,9 @@
             removeBtn: '.' + this._options.removeBtnClass,
             editBtn: '.' + this._options.editBtnClass
         });
+        if (typeof window.commentsLexicon === 'object') {
+            this._options.lexicon = window.commentsLexicon;
+        }
 
         return this.init();
     }
@@ -106,7 +115,7 @@
             self.initForm(form);
             self.startEditExpiration();
         },
-        createForm: function() {
+        createForm: function () {
             var form = $('<div/>', {
                 class: this._options.formWrapperClass
             });
@@ -169,7 +178,7 @@
                 form = self._options.formWrapper;
             }
             if (typeof captcha === 'undefined') {
-                if (typeof  self._captcha !== 'undefined') {
+                if (typeof self._captcha !== 'undefined') {
                     captcha = self._captcha;
                 } else {
                     return;
@@ -490,7 +499,7 @@
                 self.handleAjaxError(xhr);
             });
         },
-        changeCommentProperty: function(action, commentId, addClass, removeClass) {
+        changeCommentProperty: function (action, commentId, addClass, removeClass) {
             var self = this;
             var data = {
                 thread: self._options.thread,
@@ -502,10 +511,10 @@
                 function (response) {
                     if (response.status) {
                         var el = $('#comment-' + commentId);
-                        if(typeof removeClass !== 'undefined' && removeClass !== '') {
+                        if (typeof removeClass !== 'undefined' && removeClass !== '') {
                             el.removeClass(removeClass);
                         }
-                        if(typeof addClass !== 'undefined' && addClass !== '') {
+                        if (typeof addClass !== 'undefined' && addClass !== '') {
                             el.addClass(addClass);
                         }
                         if (response.messages.length > 0) {
@@ -525,45 +534,47 @@
         },
         remove: function (commentId) {
             var self = this;
-            var data = {
-                action: 'remove',
-                thread: self._options.thread,
-                id: commentId
-            };
-            $.post(self._options.connector,
-                data,
-                function (response) {
-                    if (response.status) {
-                        var element = $('#comment-' + commentId);
-                        var level = element.data('level');
-                        var _level = 0;
-                        var _element = element;
-                        do {
-                            _element = element.next(self._options.comment);
-                            _level = _element.length > 0 ? _element.data('level') : 0;
-                            if (_level > level) {
-                                element.remove();
-                                element = _element;
+            self.confirm(self.translate('remove_confirm'), function () {
+                var data = {
+                    action: 'remove',
+                    thread: self._options.thread,
+                    id: commentId
+                };
+                $.post(self._options.connector,
+                    data,
+                    function (response) {
+                        if (response.status) {
+                            var element = $('#comment-' + commentId);
+                            var level = element.data('level');
+                            var _level = 0;
+                            var _element = element;
+                            do {
+                                _element = element.next(self._options.comment);
+                                _level = _element.length > 0 ? _element.data('level') : 0;
+                                if (_level > level) {
+                                    element.remove();
+                                    element = _element;
+                                }
+                            } while (_level > level);
+                            element.remove();
+                            if (response.messages.length > 0) {
+                                self.alert('success', response.messages);
                             }
-                        } while (_level > level);
-                        element.remove();
-                        if (response.messages.length > 0) {
-                            self.alert('success', response.messages);
+                            var counter = $(self._options.commentsCount, self._options.commentsWrapper);
+                            var count = parseInt(response.count);
+                            counter.text(count);
+                        } else {
+                            self.alert('error', response.messages);
                         }
-                        var counter = $(self._options.commentsCount, self._options.commentsWrapper);
-                        var count = parseInt(response.count);
-                        counter.text(count);
-                    } else {
-                        self.alert('error', response.messages);
-                    }
-                },
-                'json'
-            ).fail(function (xhr) {
-                self.handleAjaxError(xhr);
+                    },
+                    'json'
+                ).fail(function (xhr) {
+                    self.handleAjaxError(xhr);
+                });
             });
         },
         handleAjaxError: function (xhr) {
-            var message = xhr.status == 200 ? this._options.parseErrorMessage : this._options.serverErrorMessage + xhr.status + ' ' + xhr.statusText;
+            var message = xhr.status == 200 ? this.translate('parse_error') : this.translate('server_error') + xhr.status + ' ' + xhr.statusText;
             this.alert('error', message);
         },
         disableForm: function (form) {
@@ -590,6 +601,36 @@
                 } else {
                     alert(item);
                 }
+            }
+        },
+        confirm: function (message, callback) {
+            var self = this;
+            var options = $.extend({}, this._options.notifyOptions);
+            if (typeof Noty === 'function') {
+                Noty.closeAll();
+                options.timeout = 0;
+                options.text = message;
+                options.type = 'warning';
+                options.closeWith = 'button';
+                options.buttons = [
+                    Noty.button(self.translate('yes'), 'btn btn-danger', function () {
+                        if (typeof callback === 'function') {
+                            callback();
+                        }
+                        n.close();
+                    }),
+                    Noty.button(self.translate('no'), 'btn btn-success', function () {
+                        n.close();
+                    })
+                ];
+                var n = new Noty(options).show();
+            } else {
+                confirm(message);
+            }
+        },
+        translate: function (key) {
+            if (typeof this._options.lexicon[key] !== 'undefined') {
+                return this._options.lexicon[key];
             }
         }
     };

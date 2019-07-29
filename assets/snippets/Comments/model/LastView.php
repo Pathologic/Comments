@@ -55,15 +55,13 @@ class LastView
      */
     public function getLastView ($thread, $context = 'site_content')
     {
-        $out = 0;
+        $out = false;
         $context = is_scalar($context) ? $this->modx->db->escape($context) : '';
         $thread = (int)$thread;
         $uid = (int)$this->modx->getLoginUserID('web');
         if ($uid) {
             $q = $this->modx->db->query("SELECT `last_comment` FROM {$this->modx->getFullTableName($this->table)} WHERE `context` = '{$context}' AND `thread` = {$thread} AND `uid`={$uid}");
-            if ($row = $this->modx->db->getValue($q)) {
-                $out = $row;
-            }
+            $out = (int)$this->modx->db->getValue($q);
         }
 
         return $out;

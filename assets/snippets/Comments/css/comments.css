@@ -18,6 +18,10 @@
     border-radius:4px;
     margin-top:15px;
 }
+#comments .comment.new .comment-wrap {
+    border-color: #f0ad4e;
+    border-width:2px;
+}
 #comments .comment.unpublished .comment-wrap {
     background: #f8dd84;
 }
@@ -50,7 +54,7 @@
 #comments .comment .comment-body {
     padding:15px 0;
 }
-#comments .comment.anonymous .comment-head {
+#comments .comment.guest .comment-head {
     background:#f0ffff;
 }
 #comments .comment-reply-cancel {

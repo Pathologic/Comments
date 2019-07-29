@@ -1,5 +1,6 @@
 <?php
 
+use Comments\LastView;
 use Comments\Moderation;
 use Helpers\Config;
 use Helpers\FS;
@@ -184,6 +185,11 @@ class TreeViewDocLister extends DocLister
     {
         $this->getDocList();
         $count = 0;
+        $trackNew = $this->getCFGDef('trackNewComments', 1);
+        $lastView = 0;
+        if ($trackNew) {
+            $lastView = LastView::getInstance($this->modx)->getLastView($this->getCFGDef('thread'), $this->getContext());
+        }
         foreach ($this->_docs as &$item) {
             $editable = $this->isEditable($item);
             if ($editable) {
@@ -202,11 +208,18 @@ class TreeViewDocLister extends DocLister
             if ($item['published'] && !$item['deleted']) {
                 $count++;
             }
+            if($trackNew && $item['id'] > $lastView) {
+                $item['new'] = true;
+                $item['classes'][] = $this->getCFGDef('newClass', 'new');
+            }
             $item['classes'][] = $this->getCFGDef('levelClass', 'level') . $item['level'];
         }
         unset($item);
         $this->commentsCount = $count;
         $this->lastComment = (int)end(array_keys($this->_docs));
+        if ($trackNew) {
+            LastView::getInstance($this->modx)->setLastView($this->lastComment, $this->getCFGDef('thread'), $this->getContext());
+        }
 
         return $this->_docs;
     }
@@ -337,7 +350,7 @@ class TreeViewDocLister extends DocLister
             $classes[] = $this->getCFGDef('updatedClass', 'updated');
         }
         if (!$item['createdby']) {
-            $classes[] = $this->getCFGDef('anonymousClass', 'anonymous');
+            $classes[] = $this->getCFGDef('guestClass', 'guest');
         } elseif ($this->isThreadCreator($item['createdby'])) {
             $classes[] = $this->getCFGDef('authorClass', 'author');
         }

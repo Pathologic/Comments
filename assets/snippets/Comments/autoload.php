@@ -9,6 +9,7 @@ spl_autoload_register(
             $classes = array(
                 'Comments\\Actions' => '/controller/Actions.php',
                 'Comments\\Comments' => '/model/Comments.php',
+                'Comments\\LastView' => '/model/LastView.php',
                 'Comments\\Moderation' => '/model/Moderation.php',
                 'Comments\\Plugin' => '/model/Plugin.php',
                 'Comments\\Stat' => '/model/Stat.php',

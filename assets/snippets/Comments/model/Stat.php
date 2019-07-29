@@ -3,7 +3,7 @@
 use DocumentParser;
 
 /**
- * Class ThreadsMeta
+ * Class Stat
  * @package Comments
  */
 class Stat

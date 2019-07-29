@@ -6,7 +6,7 @@
  * 
  * @category    plugin
  * @version     1.0.0
- * @internal    @events OnEmptyTrash
+ * @internal    @events OnEmptyTrash,OnWebDeleteUser
  * @internal    @modx_category Content
  * @internal    @disabled 0
 **/

@@ -5,6 +5,7 @@ use Exception;
 use autoTable;
 use Doctrine\Common\Cache\Cache;
 use DocumentParser;
+use RuntimeSharedSettings;
 
 /**
  * Class Tree
@@ -794,7 +795,8 @@ class Comments extends autoTable
             ('OnCommentsRemove', 'Comments Events')
         ");
         $this->stat->createTable();
-        \RuntimeSharedSettings::getInstance($this->modx)->createTable();
+        RuntimeSharedSettings::getInstance($this->modx)->createTable();
+        LastView::getInstance($this->modx)->createTable();
     }
 
 }

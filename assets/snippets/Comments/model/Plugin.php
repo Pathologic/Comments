@@ -29,10 +29,18 @@ class Plugin
         if ($_ids) {
             $this->modx->db->query("DELETE FROM {$this->modx->getFullTableName('comments')} WHERE `context`='site_content' AND `thread` IN ({$_ids})");
             $this->modx->db->query("DELETE FROM {$this->modx->getFullTableName('comments_stat')} WHERE `context`='site_content' AND `thread` IN ({$_ids})");
+            $this->modx->db->query("DELETE FROM {$this->modx->getFullTableName('comments_lastview')} WHERE `context`='site_content' AND `thread` IN ({$_ids})");
             foreach($ids as $thread) {
                 $this->data->dropCache($thread, 'site_content');
             }
             $this->data->dropCache();
+        }
+    }
+
+    public function OnWebDeleteUser () {
+        $userid = (int)$userid;
+        if ($userid) {
+            $this->modx->db->query("DELETE FROM {$this->modx->getFullTableName('comments_lastview')} WHERE  `uid` IN ({$userid})");
         }
     }
 }

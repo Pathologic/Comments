@@ -253,11 +253,14 @@ class Rating {
                 UNIQUE KEY `vote` (`comment`, `uid`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
-        $this->modx->db->query("
-            INSERT INTO {$this->modx->getFullTableName('system_eventnames')} (`name`, `groupname`) VALUES 
-            ('OnBeforeCommentVote', 'Comments Events'),
-            ('OnCommentVote', 'Comments Events')
-        ");
+        $q = $this->modx->db->query("SELECT `name` FROM {$this->modx->getFullTableName('system_eventnames')} WHERE `name`='OnBeforeCommentVote'");
+        if (!$this->modx->db->getValue($q)) {
+            $this->modx->db->query("
+                INSERT IGNORE INTO {$this->modx->getFullTableName('system_eventnames')} (`name`, `groupname`) VALUES 
+                ('OnBeforeCommentVote', 'Comments Events'),
+                ('OnCommentVote', 'Comments Events')
+            ");
+        }
 
         return $this;
     }

@@ -746,20 +746,22 @@ class Comments extends autoTable
             ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
-        $this->query("ALTER TABLE {$this->makeTable('system_eventnames')} ADD UNIQUE INDEX `name`(`name`)");
-        $this->query("
-            INSERT INTO {$this->makeTable('system_eventnames')} (`name`, `groupname`) VALUES 
-            ('OnBeforeCommentSave', 'Comments Events'),
-            ('OnCommentSave', 'Comments Events'),
-            ('OnBeforeCommentsDelete', 'Comments Events'),
-            ('OnCommentsDelete', 'Comments Events'),
-            ('OnBeforeCommentsPublish', 'Comments Events'),
-            ('OnCommentsPublish', 'Comments Events'),
-            ('OnBeforeCommentsUnpublish', 'Comments Events'),
-            ('OnCommentsUnpublish', 'Comments Events'),
-            ('OnBeforeCommentsRemove', 'Comments Events'),
-            ('OnCommentsRemove', 'Comments Events')
-        ");
+        $q = $this->query("SELECT `name` FROM {$this->makeTable('system_eventnames')} WHERE `name`='OnBeforeCommentSave'");
+        if (!$this->modx->db->getValue($q)) {
+            $this->query("
+                INSERT IGNORE INTO {$this->makeTable('system_eventnames')} (`name`, `groupname`) VALUES 
+                ('OnBeforeCommentSave', 'Comments Events'),
+                ('OnCommentSave', 'Comments Events'),
+                ('OnBeforeCommentsDelete', 'Comments Events'),
+                ('OnCommentsDelete', 'Comments Events'),
+                ('OnBeforeCommentsPublish', 'Comments Events'),
+                ('OnCommentsPublish', 'Comments Events'),
+                ('OnBeforeCommentsUnpublish', 'Comments Events'),
+                ('OnCommentsUnpublish', 'Comments Events'),
+                ('OnBeforeCommentsRemove', 'Comments Events'),
+                ('OnCommentsRemove', 'Comments Events')
+            ");
+        }
         $this->stat->createTable();
         RuntimeSharedSettings::getInstance($this->modx)->createTable();
         LastView::getInstance($this->modx)->createTable();

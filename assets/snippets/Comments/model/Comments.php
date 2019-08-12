@@ -1,6 +1,7 @@
 <?php namespace Comments;
 
 use APIhelpers;
+use Comments\Traits\Messages;
 use Exception;
 use autoTable;
 use Doctrine\Common\Cache\Cache;
@@ -13,6 +14,7 @@ use RuntimeSharedSettings;
  */
 class Comments extends autoTable
 {
+    use Messages;
     protected $tree_table = 'comments_tree';
     protected $table = 'comments';
     protected $guests_table = 'comments_guests';
@@ -37,7 +39,6 @@ class Comments extends autoTable
         'idNearestAncestor' => 0,
         'level'             => 0
     );
-    protected $messages = array();
     protected $stat;
 
     /**
@@ -667,41 +668,6 @@ class Comments extends autoTable
     }
 
     /**
-     * @param array $messages
-     * @return $this
-     */
-    public function addMessages (array $messages = array())
-    {
-        if (!empty($messages)) {
-            foreach ($messages as $message) {
-                if (is_scalar($message)) {
-                    $this->messages[] = $message;
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getMessages ()
-    {
-        return $this->messages;
-    }
-
-    /**
-     *
-     */
-    public function resetMessages ()
-    {
-        $this->messages = [];
-
-        return $this;
-    }
-
-    /**
      * @param int $thread
      * @param string $context
      * @return Comments
@@ -797,6 +763,7 @@ class Comments extends autoTable
         $this->stat->createTable();
         RuntimeSharedSettings::getInstance($this->modx)->createTable();
         LastView::getInstance($this->modx)->createTable();
+        Rating::getInstance($this->modx)->createTable();
     }
 
 }

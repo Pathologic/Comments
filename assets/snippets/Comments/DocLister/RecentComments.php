@@ -1,9 +1,21 @@
 <?php
+
+use Helpers\Config;
+use Helpers\FS;
+use Helpers\Lexicon;
+
 /**
  * Class CommentedDocLister
  */
 class RecentCommentsDocLister extends DocLister
 {
+    protected $lexicon = null;
+    /**
+     * Экземпляр экстендера TV
+     *
+     * @var null|xNop|tv_DL_Extender
+     */
+    protected $extTV = null;
     /**
      * Конструктор контроллеров DocLister
      *
@@ -33,8 +45,8 @@ class RecentCommentsDocLister extends DocLister
             throw new Exception('MODX var is not instaceof DocumentParser');
         }
 
-        $this->FS = \Helpers\FS::getInstance();
-        $this->config = new \Helpers\Config($cfg);
+        $this->FS = FS::getInstance();
+        $this->config = new Config($cfg);
 
         if (isset($cfg['config'])) {
             $this->config->setPath(dirname(__DIR__))->loadConfig($cfg['config']);
@@ -43,16 +55,18 @@ class RecentCommentsDocLister extends DocLister
         if ($this->config->setConfig($cfg) === false) {
             throw new Exception('no parameters to run DocLister');
         }
-
+        $this->lexicon = new Lexicon($modx, array(
+            'langDir' => 'assets/snippets/Comments/lang/',
+            'lang'    => $this->getCFGDef('lang', $this->modx->getConfig('lang_code')),
+            'handler' => $this->getCFGDef('lexiconHandler')
+        ));
+        $this->lexicon->fromFile('treeview');
         $this->loadLang(array('core', 'json'));
         $this->setDebug($this->getCFGDef('debug', 0));
 
         if ($this->checkDL()) {
             $cfg = array();
             $this->config->setConfig($cfg);
-            $this->config->setConfig(array(
-               'cacheKey' => 'recent'
-            ));
             $this->alias = 's';
             $this->table = $this->getTable('comments_stat', $this->alias);
             $this->idField = $this->getCFGDef('idField', 'id');
@@ -61,7 +75,7 @@ class RecentCommentsDocLister extends DocLister
 
             $this->extCache->init($this, array(
                 'cache'         => $this->getCFGDef('cache', 1),
-                'cacheKey'      => $this->getCFGDef('cacheKey'),
+                'cacheKey'      => $this->getCFGDef('cacheKey', 'recent'),
                 'cacheLifetime' => $this->getCFGDef('cacheLifetime', 0),
                 'cacheStrategy' => $this->getCFGDef('cacheStrategy')
             ));
@@ -80,6 +94,21 @@ class RecentCommentsDocLister extends DocLister
             $DLTemplate->setTemplateExtension($ext);
         }
         $this->DLTemplate = $DLTemplate->setTemplateData(array('DocLister' => $this));
+        $this->setFiltersJoin("LEFT JOIN {$this->getTable('comments', 'c')} ON `s`.`last_comment` = `c`.`id` LEFT JOIN {$this->getTable('comments_guests' ,'g')} ON `g`.`id`=`c`.`id`");
+        $this->joinContextTables();
+        $this->extTV = $this->getExtender('tv', true, true);
+    }
+
+    protected function joinContextTables() {
+        $this->setFiltersJoin("LEFT JOIN {$this->getTable('site_content', 'sc')} ON `sc`.`id` = `c`.`thread` AND `c`.`context`='site_content'");
+    }
+
+    /**
+     * @param $message
+     * @return string
+     */
+    public function translate($message) {
+        return $this->lexicon->get($message);
     }
 
     /**
@@ -114,12 +143,16 @@ class RecentCommentsDocLister extends DocLister
      */
     public function getDocs ($tvlist = '')
     {
+        if ($tvlist == '') {
+            $tvlist = $this->getCFGDef('tvList', '');
+        }
         $out = $this->extCache->load('comments_data');
         if ($out === false) {
+            $this->extTV->getAllTV_Name();
             $out = array();
-            $from = "{$this->table} LEFT JOIN {$this->getTable('comments', 'c')} ON `s`.`last_comment` = `c`.`id` LEFT JOIN {$this->getTable('comments_guests' ,'g')} ON `g`.`id`=`c`.`id`  LEFT JOIN {$this->getTable('site_content', 'sc')} ON `c`.`thread` = `sc`.`id` AND `c`.`context` = 'site_content'";
+            $from = "{$this->table} " . $this->filtersJoin();
             $limit = $this->LimitSQL();
-            $fields = $this->getCFGDef('selectFields', '`s`.`comments_count`,`c`.*,`g`.`name`,`sc`.`pagetitle`');
+            $fields = $this->getCFGDef('selectFields', '`s`.`comments_count`,`c`.*,`g`.`name`,`g`.`email`,`sc`.`pagetitle`,`sc`.`longtitle`');
             $rs = $this->dbQuery("SELECT {$fields} FROM {$from} WHERE `s`.`comments_count` > 0 AND `s`.`last_comment` > 0 AND `c`.`deleted` = 0 AND `c`.`published` = 1 AND `sc`.`deleted` =0 AND `sc`.`published` = 1 ORDER BY `c`.`id` DESC {$limit}");
             $this->loadExtender('user');
             /**
@@ -141,7 +174,18 @@ class RecentCommentsDocLister extends DocLister
                     $row,
                     $extSummary
                 ) : '';
-                $out[$row['id']] = $row;
+                $out[$row['thread']] = $row;
+            }
+            if ($tvlist != '' && count($this->_docs) > 0) {
+                $tv = $this->extTV->getTVList(array_keys($out), $tvlist);
+                if (!is_array($tv)) {
+                    $tv = array();
+                }
+                foreach ($tv as $docID => $TVitem) {
+                    if (isset($out[$docID]) && is_array($out[$docID])) {
+                        $out[$docID] = array_merge($out[$docID], $TVitem);
+                    }
+                }
             }
             $this->extCache->save($out, 'comments_data');
         }
@@ -190,6 +234,4 @@ class RecentCommentsDocLister extends DocLister
     {
         return array();
     }
-
-
 }

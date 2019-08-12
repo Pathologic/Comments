@@ -9,7 +9,7 @@ use DocumentParser;
 class Stat
 {
     protected $table = 'comments_stat';
-    private $modx = null;
+    protected $modx = null;
     protected static $instance;
 
     /**

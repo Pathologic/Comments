@@ -9,12 +9,12 @@ use DocumentParser;
 class LastView
 {
     protected $table = 'comments_lastview';
-    private $modx = null;
+    protected $modx = null;
     protected static $instance;
 
     /**
      * @param DocumentParser $modx
-     * @return Stat
+     * @return LastView
      */
     public static function getInstance (DocumentParser $modx)
     {

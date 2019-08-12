@@ -1,16 +1,18 @@
 <?php
 
 use Comments\LastView;
-use Comments\Moderation;
 use Helpers\Config;
 use Helpers\FS;
+use Comments\Traits\DocLister as CommentsTrait;
+use Helpers\Lexicon;
 
 /**
  * Class TreeView
  */
 class TreeViewDocLister extends DocLister
 {
-    public $moderation = null;
+    use CommentsTrait;
+
     protected $table = 'comments';
     protected $alias = 'c';
 
@@ -22,6 +24,7 @@ class TreeViewDocLister extends DocLister
     protected $order = array();
     protected $hidden = array();
     protected $relations = array();
+    protected $lexicon = null;
 
     /**
      * Конструктор контроллеров DocLister
@@ -100,6 +103,12 @@ class TreeViewDocLister extends DocLister
         if ($this->getCFGDef("customLang")) {
             $this->getCustomLang();
         }
+        $this->lexicon = new Lexicon($modx, array(
+            'langDir' => 'assets/snippets/Comments/lang/',
+            'lang'    => $this->getCFGDef('lang', $this->modx->getConfig('lang_code')),
+            'handler' => $this->getCFGDef('lexiconHandler')
+        ));
+        $this->lexicon->fromFile('treeview');
         $this->loadExtender($this->getCFGDef("extender", ""));
         $DLTemplate = DLTemplate::getInstance($modx);
         if ($path = $this->getCFGDef('templatePath')) {
@@ -117,6 +126,14 @@ class TreeViewDocLister extends DocLister
         }
     }
 
+    /**
+     * @param $message
+     * @return string
+     */
+    public function translate($message) {
+        return $this->lexicon->get($message);
+    }
+
     protected function saveSettings ()
     {
         $rtss = RuntimeSharedSettings::getInstance($this->getMODX());
@@ -125,18 +142,6 @@ class TreeViewDocLister extends DocLister
             $this->getContext(),
             $this->config->getConfig()
         );
-    }
-
-    protected function initModeration ()
-    {
-        if (!$this->getCFGDef('disableModeration', 0)) {
-            $this->moderation = new Moderation($this->modx, array(
-                'moderatedByThreadCreator' => $this->getCFGDef('moderatedByThreadCreator', 0),
-                'threadCreatorField'       => $this->getCFGDef('threadCreatorField', 'aid'),
-                'contextModel'             => $this->getCFGDef('contextModel', '\\modResource'),
-                'thread'                   => $this->getCFGDef('thread')
-            ));
-        }
     }
 
     /**
@@ -150,24 +155,6 @@ class TreeViewDocLister extends DocLister
         $this->debug->debugEnd("checkDL");
 
         return $flag;
-    }
-
-    /**
-     * @param string $context
-     */
-    public function setContext ($context = 'site_content')
-    {
-        if (!empty($context) && is_scalar($context)) {
-            $this->context = $context;
-        }
-    }
-
-    /**
-     * @return string
-     */
-    public function getContext ()
-    {
-        return $this->context;
     }
 
     /**
@@ -186,7 +173,7 @@ class TreeViewDocLister extends DocLister
         $this->getDocList();
         $count = 0;
         $trackNew = $this->getCFGDef('trackNewComments', 1);
-        $lastView = 0;
+        $lastView = false;
         if ($trackNew) {
             $lastView = LastView::getInstance($this->modx)->getLastView($this->getCFGDef('thread'), $this->getContext());
         }
@@ -208,7 +195,7 @@ class TreeViewDocLister extends DocLister
             if ($item['published'] && !$item['deleted']) {
                 $count++;
             }
-            if($trackNew && $item['id'] > $lastView) {
+            if($trackNew && $lastView !== false && $item['id'] > $lastView) {
                 $item['new'] = true;
                 $item['classes'][] = $this->getCFGDef('newClass', 'new');
             }
@@ -315,47 +302,6 @@ class TreeViewDocLister extends DocLister
         $this->toPlaceholders($this->lastComment, true, 'lastComment');
 
         return $out;
-    }
-
-    /**
-     * @param $item
-     * @return bool
-     */
-    public function isEditable ($item)
-    {
-        $out = false;
-        $uid = $this->modx->getLoginUserID('web');
-        $editTime = $this->getCFGDef('editTime', 180);
-        $commentTime = (int)($this->getTimeStart()) + $this->modx->getConfig('server_offset_time') - strtotime($item['createdon']);
-        if ($uid && $uid == $item['createdby'] && ($editTime == 0 || $editTime > $commentTime)) {
-            $out = $editTime == 0 ? true : $editTime - $commentTime;
-        }
-
-        return $out;
-    }
-
-    /**
-     * @param $item
-     * @return array
-     */
-    public function getClasses ($item)
-    {
-        $classes = array();
-        $classes[] = $item['published'] ? $this->getCFGDef('publishedClass',
-            'published') : $this->getCFGDef('unpublishedClass', 'unpublished');
-        if ($item['deleted']) {
-            $classes[] = $this->getCFGDef('deletedClass', 'deleted');
-        }
-        if ($item['updatedby']) {
-            $classes[] = $this->getCFGDef('updatedClass', 'updated');
-        }
-        if (!$item['createdby']) {
-            $classes[] = $this->getCFGDef('guestClass', 'guest');
-        } elseif ($this->isThreadCreator($item['createdby'])) {
-            $classes[] = $this->getCFGDef('authorClass', 'author');
-        }
-
-        return $classes;
     }
 
     /**
@@ -501,43 +447,6 @@ class TreeViewDocLister extends DocLister
     public function getChildrenFolder ($id)
     {
         // TODO: Implement getChildrenFolder() method.
-    }
-
-    /**
-     * @return bool
-     */
-    public function isNotGuest ()
-    {
-        $uid = $this->modx->getLoginUserID('web');
-        $disableGuests = $this->getCFGDef('disableGuests', 1);
-
-        return ($uid || !$disableGuests);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isModerator ()
-    {
-        return !is_null($this->moderation) && $this->moderation->isModerator();
-    }
-
-    /**
-     * @param string $permission
-     * @return bool
-     */
-    public function hasPermission ($permission = '')
-    {
-        return !is_null($this->moderation) && $this->moderation->hasPermission($permission);
-    }
-
-    /**
-     * @param int $uid
-     * @return bool
-     */
-    public function isThreadCreator ($uid = 0)
-    {
-        return !is_null($this->moderation) && $this->moderation->isThreadCreator($uid);
     }
 
     /**

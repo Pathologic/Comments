@@ -2,7 +2,7 @@
 {% for index, item in data%}
     <div class="recent-comment">
         <div class="recent-head">
-            <span class="username">{{ item.createdby ? item['user.fullname.createdby'] : 'Гость ' ~ item.name }}</span> <span class="createdon">{{ item.createdon | date('d.m.Y в H:i:s') }}</span>
+            <span class="username">{{ item.createdby ? item['user.fullname.createdby'] : DocLister.translate('guest') ~ ' ' ~ item.name }}</span> <span class="createdon">{{ item.createdon | date(DocLister.translate('dateFormat')) }}</span>
         </div>
         <div class="recent-body">
             <a href="{{ makeUrl(item.thread) ~ '#comment-' ~ item.id}}">{{ item.summary }}</a>
@@ -12,7 +12,7 @@
         </div>
     </div>
 {% else %}
-    Пока нет комментариев.
+    {{ DocLister.translate('nothing_commented') }}
 {% endfor %}
 </div>
 

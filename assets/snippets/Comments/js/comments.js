@@ -585,7 +585,7 @@
         },
         alert: function (type, messages) {
             var self = this;
-            if (typeof messages === 'object' && messages.constructor === 'Array') {
+            if (typeof messages === 'object' && messages.constructor === Array) {
                 if (messages.length > 0) {
                     message.forEach(function (item) {
                         self.alert(type, item);

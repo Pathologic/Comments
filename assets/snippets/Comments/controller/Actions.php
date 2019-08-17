@@ -45,7 +45,7 @@ class Actions
         $this->loadConfig();
         $this->lexicon = new Lexicon($modx, array(
             'langDir' => 'assets/snippets/Comments/lang/',
-            'lang'    => $this->getCFGDef('form', 'lang', $this->modx->getConfig('manager_language')),
+            'lang'    => $this->getCFGDef('form', 'lang', $this->modx->getConfig('lang_code')),
             'handler' => $this->getCFGDef('form', 'lexiconHandler')
         ));
         $this->lexicon->fromFile('actions');
@@ -209,13 +209,54 @@ class Actions
      */
     public function publish ()
     {
+        $this->callModelMethod('publish', 'comments_publish');
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function unpublish ()
+    {
+        $this->callModelMethod('unpublish', 'comments_unpublish');
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function delete ()
+    {
+        $this->callModelMethod('delete', 'comments_delete');
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function undelete ()
+    {
+        $this->callModelMethod('undelete', 'comments_undelete');
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function remove ()
+    {
+        $this->callModelMethod('remove', 'comments_remove', 'actions.error_remove');
+    }
+
+    /**
+     * @param $method
+     * @param $permission
+     * @param string $defaultErrorMessage
+     */
+    protected function callModelMethod($method, $permission, $defaultErrorMessage = 'actions.error_update') {
         if ($this->thread && $this->id) {
-            if ($this->moderation->hasPermission('comments_publish')) {
-                $data = $this->getModel();
-                $status = $data->publish($this->id, true, true) !== false;
+            $data = $this->getModel();
+            if (method_exists($data, $method) && $this->moderation->hasPermission($permission)) {
+                $status = $data->$method($this->id, true, true) !== false;
                 $messages = $data->getMessages();
                 if ($status === false && empty($messages)) {
-                    $messages = $this->lexicon->get('actions.error_update');
+                    $messages = $this->lexicon->get($defaultErrorMessage);
                 }
                 $stat = Stat::getInstance($this->modx)->getStat($this->thread, $this->context);
                 $this->setResult(array(
@@ -227,107 +268,7 @@ class Actions
                 $this->setResult(false, $this->lexicon->get('actions.access_denied'));
             }
         } else {
-            $this->setResult(false, $this->lexicon->get('actions.error_update'));
-        }
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function unpublish ()
-    {
-        if ($this->thread && $this->id) {
-            if ($this->moderation->hasPermission('comments_unpublish')) {
-                $data = $this->getModel();
-                $status = $data->unpublish($this->id, true, true) !== false;
-                $messages = $data->getMessages();
-                if ($status === false && empty($messages)) {
-                    $messages = $this->lexicon->get('actions.error_update');
-                }
-                $stat = Stat::getInstance($this->modx)->getStat($this->thread, $this->context);
-                $this->setResult(array(
-                    'status'   => $status,
-                    'messages' => $messages,
-                    'count'    => $stat['comments_count']
-                ));
-            }
-        } else {
-            $this->setResult(false, $this->lexicon->get('actions.error_update'));
-        }
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function delete ()
-    {
-        if ($this->thread && $this->id) {
-            if ($this->moderation->hasPermission('comments_delete')) {
-                $data = $this->getModel();
-                $status = $data->delete($this->id, true, true) !== false;
-                $messages = $data->getMessages();
-                if ($status === false && empty($messages)) {
-                    $messages = $this->lexicon->get('actions.error_update');
-                }
-                $stat = Stat::getInstance($this->modx)->getStat($this->thread, $this->context);
-                $this->setResult(array(
-                    'status'   => $status,
-                    'messages' => $messages,
-                    'count'    => $stat['comments_count']
-                ));
-            }
-        } else {
-            $this->setResult(false, $this->lexicon->get('actions.error_update'));
-        }
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function undelete ()
-    {
-        if ($this->thread && $this->id) {
-            if ($this->moderation->hasPermission('comments_undelete')) {
-                $data = $this->getModel();
-                $status = $data->undelete($this->id, true, true) !== false;
-                $messages = $data->getMessages();
-                if ($status === false && empty($messages)) {
-                    $messages = $this->lexicon->get('actions.error_update');
-                }
-                $stat = Stat::getInstance($this->modx)->getStat($this->thread, $this->context);
-                $this->setResult(array(
-                    'status'   => $status,
-                    'messages' => $messages,
-                    'count'    => $stat['comments_count']
-                ));
-            }
-        } else {
-            $this->setResult(false, $this->lexicon->get('actions.error_update'));
-        }
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function remove ()
-    {
-        if ($this->thread && $this->id) {
-            if ($this->moderation->hasPermission('comments_remove')) {
-                $data = $this->getModel();
-                $status = $data->remove($this->id, true, true) !== false;
-                $messages = $data->getMessages();
-                if ($status === false && empty($messages)) {
-                    $messages = $this->lexicon->get('actions.error_remove');
-                }
-                $stat = Stat::getInstance($this->modx)->getStat($this->thread, $this->context);
-                $this->setResult(array(
-                    'status'   => $status,
-                    'messages' => $messages,
-                    'count'    => $stat['comments_count']
-                ));
-            }
-        } else {
-            $this->setResult(false, $this->lexicon->get('actions.error_remove'));
+            $this->setResult(false, $this->lexicon->get($defaultErrorMessage));
         }
     }
 

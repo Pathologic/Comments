@@ -2,6 +2,8 @@
 
 $_lang = array();
 $_lang['guest'] = 'Guest';
+$_lang['admin'] = 'Site Administration';
+$_lang['deleted_user'] = 'Deleted user';
 $_lang['dateFormat'] = 'm.d.Y \a\t H:i:s';
 $_lang['deleted_comment'] = 'The comment is deleted.';
 $_lang['unpublished_comment'] = 'The comment is hidden.';

@@ -75,6 +75,8 @@ trait DocLister
             $classes[] = $this->getCFGDef('guestClass', 'guest');
         } elseif ($this->isThreadCreator($item['createdby'])) {
             $classes[] = $this->getCFGDef('authorClass', 'author');
+        } elseif ($item['createdby'] == '-1') {
+            $classes[] = $this->getCFGDef('adminClass', 'admin');
         }
 
         return $classes;

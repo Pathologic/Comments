@@ -2,6 +2,8 @@
 
 $_lang = array();
 $_lang['guest'] = 'Гость';
+$_lang['admin'] = 'Администрация сайта';
+$_lang['deleted_user'] = 'Удаленный пользователь';
 $_lang['dateFormat'] = 'd.m.Y в H:i:s';
 $_lang['deleted_comment'] = 'Комментарий удален.';
 $_lang['unpublished_comment'] = 'Комментарий скрыт.';

@@ -5,7 +5,7 @@
 1. Установить FormLister версии 1.9.0 или выше.
 2. Установить DocLister из GIT.
 3. Установить плагин EvoTwig. Если плагин уже был установлен, то выполнить команду "composer update".
-4. Создать необходимые таблицы:
+4. Запустить модуль или создать таблицы вручную:
 ```
 <?php
 include_once(MODX_BASE_PATH . 'assets/snippets/Comments/autoload.php');

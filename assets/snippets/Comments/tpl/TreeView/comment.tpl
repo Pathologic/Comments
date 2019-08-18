@@ -1,3 +1,15 @@
+{% if data.createdby == '-1' %}
+    {% set author = {name: DocLister.translate('admin')} %}
+{% elseif data.createdby == '0' %}
+    {% set author = {name: DocLister.translate('guest') ~ ' ' ~  data.name, email: data.email} %}
+{% else %}
+    {% set author = {name: data['user.fullname.createdby'] | default(DocLister.translate('deleted_user')), email: data['user.email.createdby'] | default('-')} %}
+{% endif %}
+{% if data.updatedby == '-1' %}
+    {% set editor = {name: DocLister.translate('admin')} %}
+{% else %}
+    {% set editor = {name: data['user.fullname.updatedby'] | default(DocLister.translate('deleted_user')), email: data['user.email.updatedby'] | default('-')} %}
+{% endif %}
 <div class="comment {{ data.classes | join(' ') }}" data-id="{{ data.id }}" data-level="{{ data.level }}" id="comment-{{ data.id }}" {% if data['edit-ttl'] %}data-edit-ttl="{{ data['edit-ttl'] }}"{% endif %}>
     <div class="comment-wrap">
     {% if data.deleted and not DocLister.isModerator() %}
@@ -10,12 +22,12 @@
         </div>
     {% else %}
         <div class="comment-head">
-            <span class="username">{{ data.createdby ? data['user.fullname.createdby'] : DocLister.translate('guest') ~ ' ' ~  data.name }}{% if DocLister.isModerator() %} ({{ data.email|default(data['user.email.createdby']) }}){% endif %}</span> <span class="createdon">{{ data.createdon | date(DocLister.translate('dateFormat')) }}</span> <span class="comment-link"><a href="{{ makeUrl(data.thread) ~ '#comment-' ~ data.id}}">#</a> {% if data.idNearestAncestor %}<a href="{{ makeUrl(data.thread) ~ '#comment-' ~ data.idNearestAncestor}}">↑</a>{% endif %}</span>
+            <span class="username">{{ author.name }}{% if DocLister.isModerator() %} ({{ author.email | default('-') }}){% endif %}</span> <span class="createdon">{{ data.createdon | date(DocLister.translate('dateFormat')) }}</span> <span class="comment-link"><a href="{{ makeUrl(data.thread) ~ '#comment-' ~ data.id}}">#</a> {% if data.idNearestAncestor %}<a href="{{ makeUrl(data.thread) ~ '#comment-' ~ data.idNearestAncestor}}">↑</a>{% endif %}</span>
         </div>
         <div class="comment-body">
             {{ data.content | raw }}
             {% if data.updatedon != '0000-00-00 00:00:00' %}
-                <div class="small">{{ DocLister.translate('edited_by') }} {{ data['user.fullname.updatedby'] }} {{ data.updatedon | date(DocLister.translate('dateFormat')) }}</div>
+                <div class="small">{{ DocLister.translate('edited_by') }} {{ editor.name }} {{ data.updatedon | date(DocLister.translate('dateFormat')) }}</div>
             {% endif %}
         </div>
         {% if DocLister.isModerator() %}

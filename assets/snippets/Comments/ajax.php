@@ -12,7 +12,16 @@ if(!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || (strtolower($_SERVER['HTTP_X_REQ
     $modx->sendErrorPage();
 }
 include_once(MODX_BASE_PATH . 'assets/snippets/Comments/autoload.php');
-$controller = new \Comments\Actions($modx);
+$cfgFile = 'assets/snippets/Comments/custom/config.php';
+$cfg = [
+    'controller' => '\\Comments\\Actions'
+];
+if (Helpers\FS::getInstance()->checkFile($cfgFile)) {
+    $cfg = require(MODX_BASE_PATH . $cfgFile);
+}
+if (is_array($cfg) && !empty($cfg['controller'])) {
+    $controller = new $cfg['controller']($modx);
+}
 $method = $_POST['action'];
 $out = array();
 if (method_exists($controller, $method)) {

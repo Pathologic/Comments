@@ -39,6 +39,8 @@ class Comments extends autoTable
         'idNearestAncestor' => 0,
         'level'             => 0
     );
+    protected $extended_fields = array();
+
     protected $stat;
 
     /**
@@ -164,6 +166,9 @@ class Comments extends autoTable
         if ($key == 'comment') {
             $key = 'rawcontent';
         }
+        if (in_array($key, ['createdby', 'updatedby', 'deletedby'])) {
+            $value = (int)$value;
+        }
 
         return parent::set($key, $value);
     }
@@ -232,7 +237,6 @@ class Comments extends autoTable
         $context = $this->get('context');
         if (!$this->newDoc) {
             $this->set('updatedon', date('Y-m-d H:i:s', $this->getTime(time())));
-            $this->set('updatedby', $this->modx->getLoginUserID('web'));
             $result = $this->getInvokeEventResult('OnBeforeCommentSave', [
                 'mode'    => $mode,
                 'comment' => $this
@@ -245,6 +249,9 @@ class Comments extends autoTable
                 $this->addMessages($result);
             } else {
                 $out = parent::save($fire_events, $clearCache);
+                if ($out) {
+                    $this->saveGuestData($out);
+                }
                 if ($out && ($this->isChanged('published') || $this->isChanged('deleted'))) {
                     $this->stat
                         ->updateLastComment($thread, $context)
@@ -257,7 +264,9 @@ class Comments extends autoTable
             }
             $this->set('createdon', date('Y-m-d H:i:s', $this->getTime(time())));
             $this->set('ip', APIhelpers::getUserIP());
-            $this->set('createdby', $this->modx->getLoginUserID('web'));
+            if (!$this->issetField('createdby')) {
+                $this->set('createdby', $this->modx->getLoginUserID('web'));
+            }
             $parent = (int)$this->get('parent');
             $result = $this->getInvokeEventResult('OnBeforeCommentSave', [
                 'mode'    => $mode,
@@ -328,7 +337,11 @@ class Comments extends autoTable
             } else {
                 $id = $this->sanitarIn($_ids);
                 if (!empty($id)) {
-                    $uid = (int)$this->modx->getLoginUserID('web');
+                    if ($this->isManagerMode()) {
+                        $uid = -1;
+                    } else {
+                        $uid = (int)$this->modx->getLoginUserID('web');
+                    }
                     $deletedon = date('Y-m-d H:i:s', $this->getTime(time()));
                     $q = $this->query("UPDATE {$this->makeTable($this->table)} SET `deleted`=1, `deletedby`={$uid}, `deletedon`='{$deletedon}' WHERE `id` IN ({$id})");
                     if ($out = $this->modx->db->getAffectedRows($q)) {
@@ -584,11 +597,7 @@ class Comments extends autoTable
                     : 0;
                 if ($idNewEntry = parent::save()) {
                     if ($idNewEntry > 0) {
-                        if (!$this->modx->getLoginUserID('web')) {
-                            $name = $this->escape($this->get('name'));
-                            $email = $this->escape($this->get('email'));
-                            $this->query("INSERT INTO {$this->makeTable($this->guests_table)} (`id`, `name`, `email`) VALUES ({$idNewEntry}, '{$name}', '{$email}')");
-                        }
+                        $this->saveGuestData($idNewEntry);
                         $sql = "INSERT INTO {$this->makeTable($this->tree_table)} (`idAncestor`, `idDescendant`, `idNearestAncestor`, `level`)
                                  SELECT `idAncestor`, {$idNewEntry}, {$id}, {$level}
                                    FROM {$this->makeTable($this->tree_table)}
@@ -609,6 +618,22 @@ class Comments extends autoTable
         }
 
         return $out;
+    }
+
+    /**
+     * @param $id
+     */
+    protected function saveGuestData($id) {
+        $id = (int)$id;
+        if ($id && !$this->get('createdby')) {
+            $name = $this->escape($this->get('name'));
+            $email = $this->escape($this->get('email'));
+            if ($this->newDoc) {
+                $this->query("INSERT INTO {$this->makeTable($this->guests_table)} (`id`, `name`, `email`) VALUES ({$id}, '{$name}', '{$email}')");
+            } elseif ($this->isChanged('name') || $this->isChanged('email')) {
+                $this->query("UPDATE {$this->makeTable($this->guests_table)} SET `name`='{$name}', `email`='{$email}' WHERE `id`={$id}");
+            }
+        }
     }
 
     /**
@@ -688,6 +713,31 @@ class Comments extends autoTable
     }
 
     /**
+     * @param array $fields
+     */
+    public function setExtendedFields($fields = array()) {
+        if (is_array($fields)) {
+            $this->extended_fields = $fields;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getExtendedFields() {
+        return $this->extended_fields;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isManagerMode() {
+        return defined('IN_MANAGER_MODE') && IN_MANAGER_MODE === true;
+    }
+
+    /**
      *
      */
     public function createTable ()
@@ -746,22 +796,20 @@ class Comments extends autoTable
             ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
-        $q = $this->query("SELECT `name` FROM {$this->makeTable('system_eventnames')} WHERE `name`='OnBeforeCommentSave'");
-        if (!$this->modx->db->getValue($q)) {
-            $this->query("
-                INSERT IGNORE INTO {$this->makeTable('system_eventnames')} (`name`, `groupname`) VALUES 
-                ('OnBeforeCommentSave', 'Comments Events'),
-                ('OnCommentSave', 'Comments Events'),
-                ('OnBeforeCommentsDelete', 'Comments Events'),
-                ('OnCommentsDelete', 'Comments Events'),
-                ('OnBeforeCommentsPublish', 'Comments Events'),
-                ('OnCommentsPublish', 'Comments Events'),
-                ('OnBeforeCommentsUnpublish', 'Comments Events'),
-                ('OnCommentsUnpublish', 'Comments Events'),
-                ('OnBeforeCommentsRemove', 'Comments Events'),
-                ('OnCommentsRemove', 'Comments Events')
-            ");
-        }
+        $this->query("ALTER TABLE {$this->makeTable('system_eventnames')} ADD UNIQUE INDEX `name`(`name`)");
+        $this->query("
+            INSERT INTO {$this->makeTable('system_eventnames')} (`name`, `groupname`) VALUES 
+            ('OnBeforeCommentSave', 'Comments Events'),
+            ('OnCommentSave', 'Comments Events'),
+            ('OnBeforeCommentsDelete', 'Comments Events'),
+            ('OnCommentsDelete', 'Comments Events'),
+            ('OnBeforeCommentsPublish', 'Comments Events'),
+            ('OnCommentsPublish', 'Comments Events'),
+            ('OnBeforeCommentsUnpublish', 'Comments Events'),
+            ('OnCommentsUnpublish', 'Comments Events'),
+            ('OnBeforeCommentsRemove', 'Comments Events'),
+            ('OnCommentsRemove', 'Comments Events')
+        ");
         $this->stat->createTable();
         RuntimeSharedSettings::getInstance($this->modx)->createTable();
         LastView::getInstance($this->modx)->createTable();

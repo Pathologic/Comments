@@ -14,7 +14,14 @@ class Moderation extends Core
      */
     public $comments = null;
     public $moderation = null;
-
+    public $forbiddenFields = array(
+        'createdby',
+        'updatedby',
+        'deletedby',
+        'createdon',
+        'deletedon',
+        'updatedon'
+    );
     /**
      * Core constructor.
      * @param DocumentParser $modx
@@ -55,8 +62,7 @@ class Moderation extends Core
      */
     public function render ()
     {
-        $allowed = ($this->modx->getLoginUserId('mgr') && $this->getCFGDef('disablePermissionsCheck', 0)) ||
-            ($this->modx->getLoginUserId('web') && $this->moderation->hasPermission('comments_edit'));
+        $allowed = $this->modx->getLoginUserId('web') && $this->moderation->hasPermission('comments_edit') || (defined('IN_MANAGER_MODE') && IN_MANAGER_MODE == 'true' );
         $allowed = $allowed && $this->comments->getID();
         if (!$allowed) {
             $this->setValid(false);
@@ -98,7 +104,14 @@ class Moderation extends Core
      */
     public function process ()
     {
-        $result = $this->comments->fromArray($this->getFormData('fields'))->save(true, true);
+        $fields = $this->filterFields($this->getFormData('fields'), $this->allowedFields, $this->forbiddenFields);
+        if (defined('IN_MANAGER_MODE') && IN_MANAGER_MODE === true) {
+            $fields['updatedby'] = -1;
+        } else {
+            $uid = $this->modx->getLoginUserID('web');
+            $fields['updatedby'] = $uid;
+        }
+        $result = $this->comments->fromArray($fields)->save(true, true);
         $extMessages = $this->addMessagesFromModel();
         if ($result) {
             $this->setFields($this->comments->toArray());

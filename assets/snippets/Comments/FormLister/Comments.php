@@ -15,6 +15,16 @@ class Comments extends Core
      */
     public $comments = null;
     protected $mode = 'create';
+    public $forbiddenFields = array(
+        'createdby',
+        'updatedby',
+        'deletedby',
+        'createdon',
+        'deletedon',
+        'updatedon',
+        'thread',
+        'context'
+    );
 
     /**
      * Core constructor.
@@ -31,6 +41,7 @@ class Comments extends Core
         $comment = $this->getCFGDef('id', 0);
         if ($comment) {
             $this->mode = 'edit';
+            $this->comments->edit($comment);
         } else {
             $this->mode = 'create';
         }
@@ -52,6 +63,7 @@ class Comments extends Core
         $uid = $this->modx->getLoginUserID('web');
         $flag = (!$useCaptchaForGuestsOnly)
             || (!$uid && $useCaptchaForGuestsOnly);
+        $flag = $flag && !$this->isManagerMode();
 
         return $flag ? parent::initCaptcha() : $this;
     }
@@ -75,7 +87,7 @@ class Comments extends Core
      */
     public function render ()
     {
-        if (!$this->isSubmitted()) {
+        if (!$this->isSubmitted() && !$this->isManagerMode()) {
             $this->saveSettings();
         } elseif ($this->checkSubmitLimit() || $this->checkSubmitProtection()) {
             $this->renderForm();
@@ -93,14 +105,16 @@ class Comments extends Core
         $this->setField('parent', $parent);
         $disableGuests = $this->getCFGDef('disableGuests', 1);
         $uid = $this->modx->getLoginUserID('web');
-        if ($disableGuests) {
-            if (!$uid) {
-                $this->setValid(false);
-                $this->renderTpl = $this->getCFGDef('skipTpl');
-            }
-        } else {
-            if (!$uid) {
-                $this->renderTpl = $this->getCFGDef('guestFormTpl');
+        if (!$this->isManagerMode()) {
+            if ($disableGuests) {
+                if (!$uid) {
+                    $this->setValid(false);
+                    $this->renderTpl = $this->getCFGDef('skipTpl');
+                }
+            } else {
+                if (!$uid) {
+                    $this->renderTpl = $this->getCFGDef('guestFormTpl');
+                }
             }
         }
 
@@ -116,10 +130,11 @@ class Comments extends Core
     {
         $disableGuests = $this->getCFGDef('disableGuests', 1);
         $uid = $this->modx->getLoginUserID('web');
-        if (!$disableGuests && !$uid && $param === 'rules') {
+        $managerMode = $this->isManagerMode();
+        if ((!$managerMode && !$disableGuests && !$uid && $param === 'rules') || ($managerMode && $this->mode == 'edit' && !$this->comments->get('createdby'))) {
             $param = 'guestRules';
         }
-        if ($this->mode == 'edit' && $this->getCFGDef('editRules')) {
+        if (!$managerMode && $this->mode == 'edit' && $this->getCFGDef('editRules')) {
             $param = 'editRules';
         }
 
@@ -132,29 +147,31 @@ class Comments extends Core
      */
     protected function renderEdit ()
     {
-        $comment = $this->getCFGDef('id', 0);
         $uid = $this->modx->getLoginUserID('web');
         $flag = false;
-        if (!$uid) {
+        $managerMode = $this->isManagerMode();
+        if (!$uid && !$managerMode) {
             $this->addMessage($this->translate('comments.only_users_can_edit'));
-        } elseif ($this->comments->edit($comment)->getID()) {
+        } elseif ($this->comments->getID()) {
             $fields = $this->comments->toArray();
-            if ($fields['createdby'] != $uid || $fields['deleted'] || !$fields['published']) {
+            if ($managerMode) {
+                $flag = true;
+            } elseif ($fields['createdby'] != $uid || $fields['deleted'] || !$fields['published']) {
                 $this->addMessage($this->translate('comments.cannot_edit'));
             } elseif (count($this->comments->getBranchIds($fields['id'])) > 1) {
                 $this->addMessage($this->translate('comments.comment_is_answered'));
             } elseif (!$this->checkEditTime($fields['createdon'])) {
                 $this->addMessage($this->translate('comments.edit_time_expired'));
-            } elseif (!$this->isSubmitted()) {
-                $flag = true;
-                $editableFields = $this->allowedFields;
-                $editableFields[] = 'rawcontent';
-                foreach ($editableFields as $key) {
-                    $this->setField($key, $fields[$key]);
-                }
-                $this->setField('comment', $this->getField('rawcontent'));
             } else {
                 $flag = true;
+            }
+            if ($flag) {
+                $this->setFields(array_merge($fields, $this->getFormData('fields')));
+                if (!$this->isSubmitted()) {
+                    $this->setField('published', $fields['published']);
+                    $this->setField('deleted', $fields['deleted']);
+                    $this->setField('comment', $this->getField('rawcontent'));
+                }
             }
         } else {
             $this->addMessage($this->translate('comments.cannot_edit'));
@@ -199,16 +216,22 @@ class Comments extends Core
         $disableGuests = $this->getCFGDef('disableGuests', 1);
         $uid = $this->modx->getLoginUserID('web');
         $result = false;
-        if ($disableGuests && !$uid) {
+        $managerMode = $this->isManagerMode();
+        if ($disableGuests && !$uid && !$managerMode) {
             $this->addMessage($this->translate('comments.only_users_can_edit'));
         } else {
             $context = $this->getCFGDef('context', 'site_content');
             $thread = (int)$this->getField('thread', 0);
             $parent = (int)$this->getField('parent', 0);
-            $fields = $this->getFormData('fields');
+            $fields = $this->filterFields($this->getFormData('fields'), $this->allowedFields, $this->forbiddenFields);
             $fields['parent'] = $parent;
             $fields['thread'] = $thread;
             $fields['context'] = $context;
+            if ($managerMode) {
+                $fields['createdby'] = -1;
+            } else {
+                $fields['createdby'] = $uid;
+            }
             if (!empty($context) && $thread) {
                 $result = $this->comments->create($fields)->save(true, true);
             }
@@ -233,13 +256,19 @@ class Comments extends Core
     {
         $result = false;
         $uid = $this->modx->getLoginUserID('web');
-        if (!$uid) {
+        $managerMode = $this->isManagerMode();
+        if (!$uid && !$managerMode) {
             $this->addMessage($this->translate('comments.only_users_can_edit'));
         } else {
             if (!empty($this->allowedFields)) {
                 $this->allowedFields[] = 'comment';
             }
             $fields = $this->filterFields($this->getFormData('fields'), $this->allowedFields, $this->forbiddenFields);
+            if ($managerMode) {
+                $fields['updatedby'] = -1;
+            } else {
+                $fields['updatedby'] = $uid;
+            }
             $result = $this->comments->fromArray($fields)->save();
         }
         if ($result) {
@@ -252,6 +281,20 @@ class Comments extends Core
         } else {
             $this->addMessage($this->translate('comments.unable_to_save'));
         }
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isManagerMode() {
+        return defined('IN_MANAGER_MODE') && IN_MANAGER_MODE === true;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMode() {
+        return $this->mode;
     }
 
     /**

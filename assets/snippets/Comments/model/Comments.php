@@ -236,11 +236,6 @@ class Comments extends autoTable
         $thread = $this->get('thread');
         $context = $this->get('context');
         if (!$this->newDoc) {
-            if ($this->isChanged('rawcontent') || (!$this->get('createdby') && ($this->isChanged('name') || $this->isChanged('email'))) || $this->isChanged('published') || $this->isChanged('deleted')) {
-                $this->set('updatedon', date('Y-m-d H:i:s', $this->getTime(time())));
-            } else {
-                $this->eraseField('updatedby');
-            }
             $result = $this->getInvokeEventResult('OnBeforeCommentSave', [
                 'mode'    => $mode,
                 'comment' => $this
@@ -252,6 +247,11 @@ class Comments extends autoTable
                 $out = false;
                 $this->addMessages($result);
             } else {
+                if ($this->isChanged('rawcontent') || (!$this->get('createdby') && ($this->isChanged('name') || $this->isChanged('email'))) || $this->isChanged('published') || $this->isChanged('deleted')) {
+                    $this->set('updatedon', date('Y-m-d H:i:s', $this->getTime(time())));
+                } else {
+                    $this->eraseField('updatedby');
+                }
                 $out = parent::save($fire_events, $clearCache);
                 if ($out) {
                     $this->saveGuestData($out);

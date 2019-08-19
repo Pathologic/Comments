@@ -146,8 +146,6 @@ class Actions
         if ($this->thread && $this->id) {
             $cfg = $this->formConfig->loadArray($this->getCFGDef('form', 'moderation'));
             $cfg['dir'] = 'assets/snippets/Comments/FormLister/';
-            $cfg['templatePath'] = 'assets/snippets/Comments/tpl/';
-            $cfg['templateExtension'] = 'tpl';
             $cfg['controller'] = 'Moderation';
             $cfg['id'] = $this->id;
             $this->setResult($this->modx->runSnippet(

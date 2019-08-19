@@ -1,4 +1,6 @@
 {
+  "templatePath": "assets/snippets/Comments/tpl/",
+  "templateExtension": "tpl",
   "wrapTpl": "@T_FILE:TreeView/wrap",
   "tpl": "@T_FILE:TreeView/comment",
   "rtssElement": "TreeViewComments",

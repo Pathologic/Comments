@@ -34,10 +34,7 @@ class Moderation extends Core
             $this->getCFGDef('model', '\Comments\Comments'),
             $this->getCFGDef('modelPath', 'assets/snippets/Comments/model/Comments.php')
         );
-        $this->lexicon->config->setConfig(array(
-            'langDir' => 'assets/snippets/Comments/lang/'
-        ));
-        $this->lexicon->fromFile('moderation');
+        $this->lexicon->fromFile('moderation', $this->getCFGDef('lang', $this->modx->getConfig('lang_code')), $this->getCFGDef('langDir', 'assets/snippets/Comments/lang/'));
         $this->log('Lexicon loaded', array('lexicon' => $this->lexicon->getLexicon()));
         if ($id = $this->getCFGDef('id', 0)) {
             $this->comments->edit($id);

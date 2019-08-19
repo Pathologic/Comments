@@ -1,7 +1,7 @@
 (function($, window){
-    function CommentsGrid(gridId, options) {
+    function CommentsGrid(gridId, gridOptions, lexicon) {
         var self = this;
-        var defaults = {
+        var gridDefaults = {
             url: '',
             fitColumns:true,
             pagination:true,
@@ -43,9 +43,30 @@
                 self.edit(row.id);
             }
         };
+        var defaultLexicon = {
+            comments: 'Комментарии',
+            create_btn: 'Новый комментарий',
+            reply_btn: 'Ответить',
+            delete_btn: 'Удалить',
+            undelete_btn: 'Восстановить',
+            publish_btn: 'Опубликовать',
+            unpublish_btn: 'Скрыть',
+            remove_btn: 'Уничтожить',
+            preview_btn: 'Предпросмотр',
+            save_btn: 'Сохранить',
+            cancel_btn: 'Отмена',
+            edit_wnd_title: 'Редактирование комментария ',
+            preview_wnd_title: 'Предпросмотр комментария',
+            server_error: 'Ошибка сервера: ',
+            parse_error: 'Не удалось обработать ответ сервера',
+            yes: 'Да',
+            no: 'Нет',
+            remove_confirm: 'Комментарий и все ответы на него будут безвозвратно удалены. Продолжить?'
+        };
         this.grid = '#' + gridId;
         var grid = $(this.grid);
-        this._options = $.extend({}, defaults, options);
+        this._options = $.extend({}, gridDefaults, gridOptions);
+        this._lexicon = $.extend({}, defaultLexicon, lexicon);
         grid.datagrid(this._options);
         var panel = grid.datagrid('getPanel');
         var pager = grid.datagrid('getPager');
@@ -54,26 +75,26 @@
                 {
                     cls: 'btn-extra action delete',
                     iconCls:'fa fa-ban fa-lg',
-                    title: 'Удалить'
+                    title: self.translate('delete_btn')
                 },
                 {
                     cls: 'btn-extra action undelete',
-                    title: 'Восстановить',
+                    title: self.translate('undelete_btn'),
                     iconCls:'fa fa-undo fa-lg'
                 },
                 {
                     cls: 'btn-extra action publish',
-                    title: 'Опубликовать',
+                    title: self.translate('publish_btn'),
                     iconCls:'fa fa-arrow-up fa-lg'
                 },
                 {
                     cls: 'btn-extra action unpublish',
-                    title: 'Скрыть',
+                    title: self.translate('unpublish_btn'),
                     iconCls:'fa fa-arrow-down fa-lg'
                 },
                 {
                     cls: 'btn-extra action remove',
-                    title: 'Уничтожить',
+                    title: self.translate('remove_btn'),
                     iconCls:'fa fa-trash fa-lg'
                 }
             ]
@@ -145,7 +166,7 @@
                 ids = [id];
             }
             var self = this;
-            $.messager.confirm('Удаление', 'Комментарии и ответы на них будут удалены без возможности восстановления. Продолжить?', function (r) {
+            $.messager.confirm(self.translate('remove_wnd_title'), self.translate('remove_confirm'), function (r) {
                 if (r && ids.length > 0) {
                     $.post(
                         this._options.url,
@@ -193,19 +214,19 @@
         createEditDialog: function(content, commentId) {
             var self = this;
             content.dialog({
-                title: 'Редактировать комментарий ' + commentId,
+                title: self.translate('edit_wnd_title') + commentId,
                 width:600,
                 resizable: true,
                 buttons:[{
                     iconCls: 'btn-red fa fa-ban fa-lg',
-                    text:'Отмена',
+                    text:self.translate('cancel_btn'),
                     handler:function(){
                         content.dialog('close');
                     }
                 },
                 {
                     iconCls: 'fa fa-eye fa-lg',
-                    text: 'Предпросмотр',
+                    text: self.translate('preview_btn'),
                     handler:function(){
                         var form = $('form', content);
                         var data = form.serializeArray();
@@ -223,7 +244,7 @@
                                         class: 'preview-wnd'
                                     });
                                     preview.window({
-                                        title:'Предпросмотр комментария',
+                                        title:self.translate('preview_wnd_title'),
                                         width: 400,
                                         collapsible: false,
                                         minimizable: false,
@@ -241,7 +262,7 @@
                 },
                 {
                     iconCls: 'btn-green fa fa-check fa-lg',
-                    text:'Сохранить',
+                    text:self.translate('save_btn'),
                     handler:function(){
                         var form = $('form', content);
                         var data = form.serializeArray();
@@ -278,7 +299,7 @@
             });
         },
         handleAjaxError: function(xhr) {
-            var message = xhr.status == 200 ? 'Не удалось обработать ответ сервера' : 'Ошибка сервера: ' + xhr.status + ' ' + xhr.statusText;
+            var message = xhr.status == 200 ? this.translate('parse_error') : this.translate('server_error') + xhr.status + ' ' + xhr.statusText;
             this.alert('error', message);
         },
         alert: function(type, messages) {
@@ -286,6 +307,11 @@
                 messages = messages.join('<br>');
             }
             $.messager.alert('&nbsp;', messages, type);
+        },
+        translate: function (key) {
+            if (typeof this._lexicon[key] !== 'undefined') {
+                return this._lexicon[key];
+            }
         }
     };
 

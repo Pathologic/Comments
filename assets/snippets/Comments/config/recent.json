@@ -1,4 +1,6 @@
 {
+  "templatePath": "assets/snippets/Comments/tpl/",
+  "templateExtension": "tpl",
   "display": 10,
   "tpl": "@T_FILE:recent",
   "introField": "",

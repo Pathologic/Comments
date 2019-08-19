@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Данные форм</title>
+    <title>[%module.title%]</title>
     <link rel="stylesheet" type="text/css" href="[+manager_url+]media/style/[+theme+]/style.css" />
     <link rel="stylesheet" href="[+manager_url+]media/style/common/font-awesome/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="[+site_url+]assets/js/easy-ui/themes/modx/easyui.css"/>
@@ -9,7 +9,10 @@
     <script type="text/javascript" src="[+manager_url+]media/script/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="[+site_url+]assets/js/easy-ui/jquery.easyui.min.js"></script>
     <script type="text/javascript" src="[+site_url+]assets/modules/Comments/js/linkbutton.js"></script>
-    <script type="text/javascript" src="[+site_url+]assets/js/easy-ui/locale/easyui-lang-ru.js"></script>
+    <script type="text/javascript" src="[+site_url+]assets/js/easy-ui/locale/easyui-lang-en.js"></script>
+    <script type="text/javascript" src="[+site_url+]assets/js/easy-ui/locale/easyui-lang-[+lang+].js"></script>
+    <script type="text/javascript" src="[+site_url+]assets/modules/Comments/js/lang/en.js"></script>
+    <script type="text/javascript" src="[+site_url+]assets/modules/Comments/js/lang/[+lang+].js"></script>
     <script type="text/javascript" src="[+site_url+]assets/modules/Comments/js/comments-grid.js"></script>
     <script type="text/javascript" src="[+site_url+]assets/modules/Comments/js/threads-grid.js"></script>
     <script type="text/javascript" src="[+site_url+]assets/modules/Comments/js/module.js"></script>
@@ -35,19 +38,19 @@
             },
             {
                 field: 'comment',
-                title: 'Комментарий',
+                title: commentsModuleLexicon.grid_comment,
                 width:300,
                 formatter: function(value, row) {
                     value += '<br><small><b>';
                     var state = [];
                     if (row.published !== '1') {
-                        state.push('Скрыт');
+                        state.push(commentsModuleLexicon.grid_isunpublished);
                     }
                     if (row.deleted === '1') {
-                        state.push('Удален');
+                        state.push(commentsModuleLexicon.grid_isdeleted);
                     }
                     if (row.updatedon !== '0000-00-00 00:00:00') {
-                        state.push('Изменен ' + row.updatedon + '</b>');
+                        state.push(commentsModuleLexicon.grid_ischanged + row.updatedon + '</b>');
                     }
                     value += state.join('; ');
                     value += '</b></small>';
@@ -69,7 +72,7 @@
             },
             {
                 field: 'createdby',
-                title: 'Автор',
+                title: commentsModuleLexicon.grid_author,
                 sortable: true,
                 width: 100,
                 formatter: function(value, row) {
@@ -85,7 +88,7 @@
             },
             {
                 field: 'thread',
-                title: 'Ресурс',
+                title: commentsModuleLexicon.grid_thread,
                 sortable: true,
                 fixed: true,
                 width: 70,
@@ -93,13 +96,13 @@
             },
             {
                 field: 'title',
-                title: 'Название ресурса',
+                title: commentsModuleLexicon.grid_thread_title,
                 width:150,
                 formatter: sanitize
             },
             {
                 field: 'context',
-                title: 'Контекст',
+                title: commentsModuleLexicon.grid_context,
                 sortable: true,
                 width:90,
                 fixed:true
@@ -109,7 +112,7 @@
                 width: 85,
                 fixed: true,
                 align: 'center',
-                title: 'Дата создания',
+                title: commentsModuleLexicon.grid_createdon,
                 sortable: true,
                 formatter: dateFormatter
             },
@@ -122,16 +125,16 @@
                 formatter: function (value, row) {
                     var actions = '';
                     if (row.deleted === '1') {
-                        actions += '<a class="action undelete" href="' + row.id + '" title="Восстановить"><i class="fa fa-undo fa-lg"></i></a>';
+                        actions += '<a class="action undelete" href="' + row.id + '" title="' + commentsModuleLexicon.undelete_btn + '"><i class="fa fa-undo fa-lg"></i></a>';
                     } else {
-                        actions += '<a class="action delete" href="' + row.id + '" title="Удалить"><i class="fa fa-ban fa-lg"></i></a>';
+                        actions += '<a class="action delete" href="' + row.id + '" title="' + commentsModuleLexicon.delete_btn + '"><i class="fa fa-ban fa-lg"></i></a>';
                     }
                     if (row.published === '1') {
-                        actions += '<a class="action unpublish" href="' + row.id + '" title="Скрыть"><i class="fa fa-arrow-down fa-lg"></i></a>';
+                        actions += '<a class="action unpublish" href="' + row.id + '" title="' + commentsModuleLexicon.unpublish_btn + '"><i class="fa fa-arrow-down fa-lg"></i></a>';
                     } else {
-                        actions += '<a class="action publish" href="' + row.id + '" title="Опубликовать"><i class="fa fa-arrow-up fa-lg"></i></a>';
+                        actions += '<a class="action publish" href="' + row.id + '" title="' + commentsModuleLexicon.publish_btn + '"><i class="fa fa-arrow-up fa-lg"></i></a>';
                     }
-                    actions += '<a class="action remove" href="' + row.id + '" title="Уничтожить"><i class="fa fa-trash fa-lg"></i></a>';
+                    actions += '<a class="action remove" href="' + row.id + '" title="' + commentsModuleLexicon.remove_btn + '"><i class="fa fa-trash fa-lg"></i></a>';
 
                     return actions;
                 }
@@ -150,14 +153,14 @@
             },
             {
                 field: 'context',
-                title: 'Контекст',
+                title: commentsModuleLexicon.grid_context,
                 sortable: true,
                 fixed: true,
                 width:50
             },
             {
                 field: 'title',
-                title: 'Название ресурса',
+                title: commentsModuleLexicon.grid_thread_title,
                 sortable: true,
                 width:150,
                 fixed:true,
@@ -165,7 +168,7 @@
             },
             {
                 field: 'comments_count',
-                title: 'Количество комментариев',
+                title: commentsModuleLexicon.grid_comments_count,
                 sortable: true,
                 width: 50,
                 formatter: sanitize
@@ -224,12 +227,12 @@
     <i class="fa fa-comments-o"></i>
   </span>
     <span class="pagetitle-text">
-    Управление комментариями
+    [%module.title%]
   </span>
 </h1>
 <div id="actions">
     <ul class="actionButtons">
-        <li><a href="#" onclick="document.location.href='index.php?a=106';">Закрыть модуль</a></li>
+        <li><a href="#" onclick="document.location.href='index.php?a=106';">[%module.close_btn%]</a></li>
     </ul>
 </div>
 <div class="sectionBody">
@@ -239,7 +242,7 @@
         </script>
 
         <div class="tab-page" id="comments">
-            <h2 class="tab"><i class="fa fa-comments-o"></i> Комментарии</h2>
+            <h2 class="tab"><i class="fa fa-comments-o"></i> [%module.comments%]</h2>
             <script type="text/javascript">
                 tpResources.addTabPage(document.getElementById('comments'), function(){
                     if (_commentsGrid !== false) {
@@ -250,7 +253,7 @@
                             site_url: Config.site_url,
                             manager_url: Config.manager_url,
                             columns: [CommentsGridColumns]
-                        });
+                        }, commentsModuleLexicon);
                     }
                 });
             </script>
@@ -259,7 +262,7 @@
             </div>
         </div>
         <!-- div class="tab-page" id="threads">
-            <h2 class="tab"><i class="fa fa-newspaper-o"></i> Ресурсы</h2>
+            <h2 class="tab"><i class="fa fa-newspaper-o"></i> [%module.documents%]</h2>
             <script type="text/javascript">
                 tpResources.addTabPage(document.getElementById('threads'), function(){
                     if (_threadsGrid !== false) {
@@ -268,8 +271,8 @@
                         return;
                         _threadsGrid = new CommentsGrid('comments-grid', {
                             url: Config.url,
-                            columns: [ThreadsGridColumns]
-                        });
+                            columns: [ThreadsGridColumns],
+                        }, commentsModuleLexicon);
                     }
                 });</script>
             <div class="tab-body">

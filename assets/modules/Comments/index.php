@@ -17,5 +17,5 @@ if (Helpers\FS::getInstance()->checkFile($cfgFile)) {
 if (is_array($cfg) && !empty($cfg['module'])) {
     $module = new $cfg['module']($modx);
 }
-$module = new $module($modx);
+
 echo $module->render();

@@ -28,8 +28,6 @@ class Comments
         'apiFormat'         => 'array',
         'dir'               => 'assets/snippets/Comments/FormLister/',
         'controller'        => 'Comments',
-        'templatePath'      => 'assets/modules/Comments/tpl/',
-        'templateExtension' => 'tpl',
         'skipPrerender'     => 'true'
     ];
 
@@ -203,7 +201,7 @@ class Comments
         $comments = $FormLister->comments;
         if ($FormLister->getMode() == 'edit' && $comments->getID()) {
             $users = [];
-            $fields = ['createdby', 'updatedby', 'deleteby'];
+            $fields = ['createdby', 'updatedby', 'deletedby'];
             foreach ($fields as $field) {
                 $uid = $comments->get($field);
                 if ($uid > 0) {

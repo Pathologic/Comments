@@ -63,13 +63,12 @@
             no: 'Нет',
             remove_confirm: 'Комментарий и все ответы на него будут безвозвратно удалены. Продолжить?'
         };
-        this.grid = '#' + gridId;
-        var grid = $(this.grid);
+        this.grid = $('#' + gridId);
         this._options = $.extend({}, gridDefaults, gridOptions);
         this._lexicon = $.extend({}, defaultLexicon, lexicon);
-        grid.datagrid(this._options);
-        var panel = grid.datagrid('getPanel');
-        var pager = grid.datagrid('getPager');
+        this.grid.datagrid(this._options);
+        var panel = this.grid.datagrid('getPanel');
+        var pager = this.grid.datagrid('getPager');
         pager.pagination({
             buttons:[
                 {
@@ -115,11 +114,11 @@
     }
     CommentsGrid.prototype = {
         reload: function() {
-            $(this.grid).datagrid('reload');
+            this.grid.datagrid('reload');
         },
         getSelected: function() {
             var ids = [];
-            var rows = $(this.grid).datagrid('getChecked');
+            var rows = this.grid.datagrid('getChecked');
             if (rows.length) {
                 $.each(rows, function(i, row) {
                     ids.push(row.id);
@@ -279,7 +278,7 @@
                                         self.alert('', response.messages);
                                     }
                                     content.dialog('close');
-                                    self.reload();
+                                    self.updateGridRow(commentId);
                                 } else {
                                     if (response.hasOwnProperty('errors') && Object.keys(response.errors).length > 0) {
                                         content.html(response.output);
@@ -297,6 +296,32 @@
                     $('#comment-' + commentId).remove();
                 }
             });
+        },
+        updateGridRow: function(commentId) {
+            var index = this.grid.datagrid('getRowIndex', commentId);
+            var self = this;
+            if (index !== -1) {
+                self.grid.datagrid('loading');
+                $.post(
+                    self._options.url,
+                    {
+                        action: 'comments/single',
+                        id: commentId
+                    },
+                    function (response) {
+                        if (response.status) {
+                            self.grid.datagrid('updateRow', {
+                                index: index,
+                                row: response.row
+                            });
+                        }
+                        self.grid.datagrid('loaded');
+                    }, 'json'
+                ).fail(function(xhr){
+                    self.grid.datagrid('loaded');
+                    self.handleAjaxError(xhr);
+                });
+            }
         },
         handleAjaxError: function(xhr) {
             var message = xhr.status == 200 ? this.translate('parse_error') : this.translate('server_error') + xhr.status + ' ' + xhr.statusText;

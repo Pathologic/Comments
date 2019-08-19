@@ -34,10 +34,16 @@ class CommentsDocLister extends onetableDocLister
     {
         $this->_docs = $this->getDocList();
         $this->addUsers($this->_docs);
-        return [
-            'rows'  => array_values($this->_docs),
-            'total' => $this->getChildrenCount()
-        ];
+        if ($this->getCFGDef('mode') == 'single') {
+            $out = count($this->_docs) ? array_values($this->_docs)[0] : false;
+        } else {
+            $out = [
+                'rows'  => array_values($this->_docs),
+                'total' => $this->getChildrenCount()
+            ];
+        }
+
+        return $out;
     }
 
     /**

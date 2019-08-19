@@ -190,10 +190,10 @@
                 self.handleAjaxError(xhr);
             });
         },
-        createEditDialog: function(content) {
+        createEditDialog: function(content, commentId) {
             var self = this;
             content.dialog({
-                title: 'Редактировать комментарий',
+                title: 'Редактировать комментарий ' + commentId,
                 width:600,
                 resizable: true,
                 buttons:[{
@@ -271,7 +271,10 @@
                             self.handleAjaxError(xhr);
                         });
                     }
-                }]
+                }],
+                onClose: function() {
+                    $('#comment-' + commentId).remove();
+                }
             });
         },
         handleAjaxError: function(xhr) {

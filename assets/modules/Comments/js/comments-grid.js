@@ -1,7 +1,7 @@
 (function($, window){
-    function CommentsGrid(gridId, options) {
+    function CommentsGrid(gridId, gridOptions, lexicon) {
         var self = this;
-        var defaults = {
+        var gridDefaults = {
             url: '',
             fitColumns:true,
             pagination:true,
@@ -43,37 +43,57 @@
                 self.edit(row.id);
             }
         };
-        this.grid = '#' + gridId;
-        var grid = $(this.grid);
-        this._options = $.extend({}, defaults, options);
-        grid.datagrid(this._options);
-        var panel = grid.datagrid('getPanel');
-        var pager = grid.datagrid('getPager');
+        var defaultLexicon = {
+            comments: 'Комментарии',
+            create_btn: 'Новый комментарий',
+            reply_btn: 'Ответить',
+            delete_btn: 'Удалить',
+            undelete_btn: 'Восстановить',
+            publish_btn: 'Опубликовать',
+            unpublish_btn: 'Скрыть',
+            remove_btn: 'Уничтожить',
+            preview_btn: 'Предпросмотр',
+            save_btn: 'Сохранить',
+            cancel_btn: 'Отмена',
+            edit_wnd_title: 'Редактирование комментария ',
+            preview_wnd_title: 'Предпросмотр комментария',
+            server_error: 'Ошибка сервера: ',
+            parse_error: 'Не удалось обработать ответ сервера',
+            yes: 'Да',
+            no: 'Нет',
+            remove_confirm: 'Комментарий и все ответы на него будут безвозвратно удалены. Продолжить?'
+        };
+        this.grid = $('#' + gridId);
+        this._options = $.extend({}, gridDefaults, gridOptions);
+        this._lexicon = $.extend({}, defaultLexicon, lexicon);
+        this.grid.datagrid(this._options);
+        var panel = this.grid.datagrid('getPanel');
+        var pager = this.grid.datagrid('getPager');
         pager.pagination({
             buttons:[
                 {
                     cls: 'btn-extra action delete',
                     iconCls:'fa fa-ban fa-lg',
-                    title: 'Удалить'
+                    title: self.translate('delete_btn')
                 },
                 {
                     cls: 'btn-extra action undelete',
-                    title: 'Восстановить',
+                    title: self.translate('undelete_btn'),
                     iconCls:'fa fa-undo fa-lg'
                 },
                 {
                     cls: 'btn-extra action publish',
-                    title: 'Опубликовать',
+                    title: self.translate('publish_btn'),
                     iconCls:'fa fa-arrow-up fa-lg'
                 },
                 {
                     cls: 'btn-extra action unpublish',
-                    title: 'Скрыть',
+                    title: self.translate('unpublish_btn'),
                     iconCls:'fa fa-arrow-down fa-lg'
                 },
                 {
                     cls: 'btn-extra action remove',
-                    title: 'Уничтожить',
+                    title: self.translate('remove_btn'),
                     iconCls:'fa fa-trash fa-lg'
                 }
             ]
@@ -94,11 +114,11 @@
     }
     CommentsGrid.prototype = {
         reload: function() {
-            $(this.grid).datagrid('reload');
+            this.grid.datagrid('reload');
         },
         getSelected: function() {
             var ids = [];
-            var rows = $(this.grid).datagrid('getChecked');
+            var rows = this.grid.datagrid('getChecked');
             if (rows.length) {
                 $.each(rows, function(i, row) {
                     ids.push(row.id);
@@ -145,7 +165,7 @@
                 ids = [id];
             }
             var self = this;
-            $.messager.confirm('Удаление', 'Комментарии и ответы на них будут удалены без возможности восстановления. Продолжить?', function (r) {
+            $.messager.confirm(self.translate('remove_wnd_title'), self.translate('remove_confirm'), function (r) {
                 if (r && ids.length > 0) {
                     $.post(
                         this._options.url,
@@ -193,19 +213,19 @@
         createEditDialog: function(content, commentId) {
             var self = this;
             content.dialog({
-                title: 'Редактировать комментарий ' + commentId,
+                title: self.translate('edit_wnd_title') + commentId,
                 width:600,
                 resizable: true,
                 buttons:[{
                     iconCls: 'btn-red fa fa-ban fa-lg',
-                    text:'Отмена',
+                    text:self.translate('cancel_btn'),
                     handler:function(){
                         content.dialog('close');
                     }
                 },
                 {
                     iconCls: 'fa fa-eye fa-lg',
-                    text: 'Предпросмотр',
+                    text: self.translate('preview_btn'),
                     handler:function(){
                         var form = $('form', content);
                         var data = form.serializeArray();
@@ -223,7 +243,7 @@
                                         class: 'preview-wnd'
                                     });
                                     preview.window({
-                                        title:'Предпросмотр комментария',
+                                        title:self.translate('preview_wnd_title'),
                                         width: 400,
                                         collapsible: false,
                                         minimizable: false,
@@ -241,7 +261,7 @@
                 },
                 {
                     iconCls: 'btn-green fa fa-check fa-lg',
-                    text:'Сохранить',
+                    text:self.translate('save_btn'),
                     handler:function(){
                         var form = $('form', content);
                         var data = form.serializeArray();
@@ -258,7 +278,7 @@
                                         self.alert('', response.messages);
                                     }
                                     content.dialog('close');
-                                    self.reload();
+                                    self.updateGridRow(commentId);
                                 } else {
                                     if (response.hasOwnProperty('errors') && Object.keys(response.errors).length > 0) {
                                         content.html(response.output);
@@ -277,8 +297,34 @@
                 }
             });
         },
+        updateGridRow: function(commentId) {
+            var index = this.grid.datagrid('getRowIndex', commentId);
+            var self = this;
+            if (index !== -1) {
+                self.grid.datagrid('loading');
+                $.post(
+                    self._options.url,
+                    {
+                        action: 'comments/single',
+                        id: commentId
+                    },
+                    function (response) {
+                        if (response.status) {
+                            self.grid.datagrid('updateRow', {
+                                index: index,
+                                row: response.row
+                            });
+                        }
+                        self.grid.datagrid('loaded');
+                    }, 'json'
+                ).fail(function(xhr){
+                    self.grid.datagrid('loaded');
+                    self.handleAjaxError(xhr);
+                });
+            }
+        },
         handleAjaxError: function(xhr) {
-            var message = xhr.status == 200 ? 'Не удалось обработать ответ сервера' : 'Ошибка сервера: ' + xhr.status + ' ' + xhr.statusText;
+            var message = xhr.status == 200 ? this.translate('parse_error') : this.translate('server_error') + xhr.status + ' ' + xhr.statusText;
             this.alert('error', message);
         },
         alert: function(type, messages) {
@@ -286,6 +332,11 @@
                 messages = messages.join('<br>');
             }
             $.messager.alert('&nbsp;', messages, type);
+        },
+        translate: function (key) {
+            if (typeof this._lexicon[key] !== 'undefined') {
+                return this._lexicon[key];
+            }
         }
     };
 

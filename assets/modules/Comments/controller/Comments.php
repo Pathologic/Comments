@@ -22,15 +22,13 @@ class Comments
         'dotSummary' => 1
     ];
     protected $flParams = [
-        'formid'            => 'comment-edit',
-        'config'            => 'edit:assets/modules/Comments/config/',
-        'api'               => 2,
-        'apiFormat'         => 'array',
-        'dir'               => 'assets/snippets/Comments/FormLister/',
-        'controller'        => 'Comments',
-        'templatePath'      => 'assets/modules/Comments/tpl/',
-        'templateExtension' => 'tpl',
-        'skipPrerender'     => 'true'
+        'formid'        => 'comment-edit',
+        'config'        => 'edit:assets/modules/Comments/config/',
+        'api'           => 2,
+        'apiFormat'     => 'array',
+        'dir'           => 'assets/snippets/Comments/FormLister/',
+        'controller'    => 'Comments',
+        'skipPrerender' => 'true'
     ];
 
     /**
@@ -51,14 +49,40 @@ class Comments
     public function listing ()
     {
         $cfg = $this->dlParams;
-        if (!empty($_POST['sort']) && is_scalar($_POST['sort'])) {
-            $cfg['sortBy'] = $_POST['sort'];
+        if ($rows = (int)$this->getRequest('rows', 0, 'is_numeric')) {
+            $cfg['display'] = $rows;
+            if ($offset = (int)$this->getRequest('page', 1, 'is_numeric')) {
+                $offset = $rows * abs($offset - 1);
+                $cfg['offset'] = $offset;
+            }
         }
-        if (!empty($_POST['order']) && is_scalar($_POST['order'])) {
-            $cfg['sortDir'] = $_POST['order'];
+        if ($sort = $this->getRequest('sort', '', 'is_scalar')) {
+            $cfg['sortBy'] = $sort;
+        }
+        if ($order = $this->getRequest('order', '', 'is_scalar')) {
+            $cfg['sortDir'] = $order;
         }
 
         $this->setResult($this->runDocLister($cfg));
+    }
+
+    public function single ()
+    {
+        $cfg = $this->dlParams;
+        $out = ['status' => false];
+        if ($id = (int)$this->getRequest('id', 0, 'is_numeric')) {
+            $cfg['addWhereList'] = 'c.id = ' . $id;
+            $cfg['mode'] = 'single';
+            $cfg['display'] = 1;
+            if ($row = $this->runDocLister($cfg)) {
+                $out = [
+                    'status' => true,
+                    'row'    => $row
+                ];
+            }
+        }
+
+        $this->setResult($out);
     }
 
     public function publish ()
@@ -144,14 +168,15 @@ class Comments
         }
     }
 
-    public function preview() {
+    public function preview ()
+    {
         $cfg = $this->flParams;
         $cfg = array_merge($cfg, [
             'controller' => 'CommentPreview',
             'dir'        => 'assets/snippets/Comments/FormLister/',
             'formid'     => 'preview',
             'api'        => 1,
-            'context'   => $this->getRequest('context', 'site_content', 'is_scalar')
+            'context'    => $this->getRequest('context', 'site_content', 'is_scalar')
         ]);
         $this->setResult($this->modx->runSnippet('FormLister', $cfg));
     }
@@ -199,11 +224,12 @@ class Comments
         return $this->result;
     }
 
-    public static function flPrepare($modx, $data, $FormLister) {
+    public static function flPrepare ($modx, $data, $FormLister)
+    {
         $comments = $FormLister->comments;
         if ($FormLister->getMode() == 'edit' && $comments->getID()) {
             $users = [];
-            $fields = ['createdby', 'updatedby', 'deleteby'];
+            $fields = ['createdby', 'updatedby', 'deletedby'];
             foreach ($fields as $field) {
                 $uid = $comments->get($field);
                 if ($uid > 0) {

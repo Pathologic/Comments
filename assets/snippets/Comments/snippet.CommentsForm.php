@@ -5,8 +5,6 @@ $_params = array_merge(array(
     'dir'=>'assets/snippets/Comments/FormLister/',
     'controller'=>'Comments',
     'formid'=>'comments-form',
-    'templatePath' => 'assets/snippets/Comments/tpl/',
-    'templateExtension' => 'tpl',
     'thread' => $modx->documentIdentifier
     ), $params
 );

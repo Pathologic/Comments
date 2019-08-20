@@ -1,12 +1,12 @@
-{% if data.createdby == '-1' %}
-    {% set author = DocLister.translate('admin') %}
-{% elseif data.createdby == '0' %}
-    {% set author = DocLister.translate('guest') ~ ' ' ~  data.name %}
-{% else %}
-    {% set author = data['user.fullname.createdby'] | default(DocLister.translate('deleted_user')) %}
-{% endif %}
 <div class="recent-comments">
 {% for index, item in data%}
+    {% if item.createdby == '-1' %}
+        {% set author = DocLister.translate('admin') %}
+    {% elseif item.createdby == '0' %}
+        {% set author = DocLister.translate('guest') ~ ' ' ~  item.name %}
+    {% else %}
+        {% set author = item['user.fullname.createdby'] | default(item['user.username.createdby']) | default(DocLister.translate('deleted_user')) %}
+    {% endif %}
     <div class="recent-comment">
         <div class="recent-head">
             <span class="username">{{ author }}</span> <span class="createdon">{{ item.createdon | date(DocLister.translate('dateFormat')) }}</span>

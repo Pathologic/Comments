@@ -1,23 +1,24 @@
 {
+  "templatePath": "assets/modules/Comments/tpl/",
+  "templateExtension": "tpl",
   "formTpl": "@T_FILE:Forms/edit",
-  "guestFormTpl": "@T_FILE:Forms/editGuest",
   "protectSubmit": 0,
   "submitLimit": 0,
   "rules": {
     "comment": {
-      "required": "Введите текст комментария"
+      "required": "[%module.form.comment_required%]"
     }
   },
   "guestRules": {
     "name": {
-      "required":"Введите ваше имя"
+      "required":"[%module.form.name_required%]"
     },
     "email": {
-      "required": "Введите e-mail",
-      "email": "Введите e-mail правильно"
+      "required": "[%module.form.email_required%]",
+      "email": "[%module.form.email_incorrect%]"
     },
     "comment": {
-      "required": "Введите текст комментария"
+      "required": "[%module.form.comment_required%]"
     }
   },
   "formControls": ["published", "deleted"],
@@ -32,5 +33,7 @@
     "name":["trim", "ucfirst", "removeExtraSpaces", "stripTags"],
     "email":["trim", "email"],
     "comment": ["trim", "compressText"]
-  }
+  },
+  "langDir": "assets/modules/Comments/lang/",
+  "lexicon": "edit"
 }

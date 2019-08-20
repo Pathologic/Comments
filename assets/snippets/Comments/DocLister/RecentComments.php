@@ -190,6 +190,8 @@ class RecentCommentsDocLister extends DocLister
                 }
             }
             $this->extCache->save($this->_docs, 'comments_data');
+        } else {
+            $this->_docs = $out;
         }
 
         return $this->_docs;

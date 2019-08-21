@@ -100,19 +100,8 @@ class Comments extends Core
     {
         $parent = (int)$this->getField('parent', 0);
         $this->setField('parent', $parent);
-        $disableGuests = $this->getCFGDef('disableGuests', 1);
-        $uid = $this->modx->getLoginUserID('web');
-        if (!$this->isManagerMode()) {
-            if ($disableGuests) {
-                if (!$uid) {
-                    $this->setValid(false);
-                    $this->renderTpl = $this->getCFGDef('skipTpl');
-                }
-            } else {
-                if (!$uid) {
-                    $this->renderTpl = $this->getCFGDef('guestFormTpl');
-                }
-            }
+        if (!$this->isManagerMode() && !$this->isGuestEnabled() && $this->isGuest()) {
+            $this->setValid(false);
         }
 
         return parent::render();
@@ -125,10 +114,8 @@ class Comments extends Core
      */
     public function getValidationRules ($param = 'rules')
     {
-        $disableGuests = $this->getCFGDef('disableGuests', 1);
-        $uid = $this->modx->getLoginUserID('web');
         $managerMode = $this->isManagerMode();
-        if ((!$managerMode && !$disableGuests && !$uid && $param === 'rules') || ($managerMode && $this->mode == 'edit' && !$this->comments->get('createdby'))) {
+        if ((!$managerMode && $this->isGuestEnabled() && $this->isGuest() && $param === 'rules') || ($managerMode && $this->mode == 'edit' && !$this->comments->get('createdby'))) {
             $param = 'guestRules';
         }
         if (!$managerMode && $this->mode == 'edit' && $this->getCFGDef('editRules')) {
@@ -175,9 +162,6 @@ class Comments extends Core
             $this->addMessage($this->translate('comments.cannot_edit'));
         }
         $this->setValid($flag);
-        if ($tpl = $this->getCFGDef('editFormTpl')) {
-            $this->renderTpl = $tpl;
-        };
 
         return parent::render();
     }
@@ -211,11 +195,10 @@ class Comments extends Core
      */
     public function processCreate ()
     {
-        $disableGuests = $this->getCFGDef('disableGuests', 1);
         $uid = $this->modx->getLoginUserID('web');
         $result = false;
         $managerMode = $this->isManagerMode();
-        if ($disableGuests && !$uid && !$managerMode) {
+        if (!$uid && !$managerMode) {
             $this->addMessage($this->translate('comments.only_users_can_edit'));
         } else {
             $context = $this->getCFGDef('context', 'site_content');
@@ -293,6 +276,20 @@ class Comments extends Core
      */
     public function getMode() {
         return $this->mode;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGuest() {
+        return !$this->modx->getLoginUserID('web');
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGuestEnabled() {
+        return !(int)$this->getCFGDef('disableGuests', 1);
     }
 
     /**

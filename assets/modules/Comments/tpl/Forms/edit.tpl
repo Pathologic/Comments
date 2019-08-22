@@ -7,10 +7,7 @@
     <div class="form-group">
         <label for="comment">{{ FormLister.translate('module.form.comment') }}</label>
         <textarea class="form-control" id="comment" placeholder="{{ FormLister.translate('module.form.comment_placeholder') }}" rows="10" name="comment" style="resize: none;">{{ data.comment }}</textarea>
-        {% set error = FormLister.getErrorMessage('comment') %}
-        {% if error %}
-            <div class="invalid-feedback">{{ error | join('<br>') }}</div>
-        {% endif %}
+        {{ plh['comment.error'] | raw }}
     </div>
     <div class="container-fluid">
         <div class="row">
@@ -37,20 +34,14 @@
                 <div class="form-group">
                     <label for="name">{{ FormLister.translate('module.form.name') }}</label>
                     <input type="text" name="name" class="form-control" value="{{ data.name }}">
-                    {% set error = FormLister.getErrorMessage('name') %}
-                    {% if error %}
-                        <div class="invalid-feedback">{{ error | join('<br>') }}</div>
-                    {% endif %}
+                    {{ plh['name.error'] | raw }}
                 </div>
             </div>
             <div class="col-xs-6">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="text" name="email" class="form-control" value="{{ data.email }}">
-                    {% set error = FormLister.getErrorMessage('email') %}
-                    {% if error %}
-                        <div class="invalid-feedback">{{ error | join('<br>') }}</div>
-                    {% endif %}
+                    {{ plh['email.error'] | raw }}
                 </div>
             </div>
         </div>

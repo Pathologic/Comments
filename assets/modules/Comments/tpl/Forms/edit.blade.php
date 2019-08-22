@@ -7,10 +7,7 @@
     <div class="form-group">
         <label for="comment">{{ $FormLister->translate('module.form.comment') }}</label>
         <textarea class="form-control" id="comment" placeholder="{{ $FormLister->translate('module.form.comment_placeholder') }}" rows="10" name="comment" style="resize: none;">{{ $data['comment'] }}</textarea>
-        @php $error = $FormLister->getErrorMessage('comment') @endphp
-        @if ($error)
-            <div class="invalid-feedback">{!! implode('<br>', $error) !!}</div>
-        @endif
+        {!! $plh['comment.error'] !!}
     </div>
     <div class="container-fluid">
         <div class="row">
@@ -37,20 +34,14 @@
                 <div class="form-group">
                     <label for="name">{{ $FormLister->translate('module.form.name') }}</label>
                     <input type="text" name="name" class="form-control" value="{{ $data['name'] }}">
-                    @php $error = $FormLister->getErrorMessage('name') @endphp
-                    @if ($error)
-                        <div class="invalid-feedback">{!! implode('<br>', $error) !!}</div>
-                    @endif
+                    {!! $plh['name.error'] !!}
                 </div>
             </div>
             <div class="col-xs-6">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="text" name="email" class="form-control" value="{{ $data['email'] }}">
-                    @php $error = $FormLister->getErrorMessage('email') @endphp
-                    @if ($error)
-                        <div class="invalid-feedback">{!! implode('<br>', $error) !!}</div>
-                    @endif
+                    {!! $plh['email.error'] !!}
                 </div>
             </div>
         </div>

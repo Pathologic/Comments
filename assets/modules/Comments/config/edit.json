@@ -29,6 +29,8 @@
   "errorClass": " is-invalid",
   "requiredClass": " is-invalid",
   "errorTpl" : "@CODE:<div class=\"invalid-feedback\">[+message+]</div>",
+  "skipPrerender": 1,
+  "prerenderErrors": 1,
   "filters": {
     "name":["trim", "ucfirst", "removeExtraSpaces", "stripTags"],
     "email":["trim", "email"],

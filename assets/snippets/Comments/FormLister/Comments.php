@@ -199,7 +199,7 @@ class Comments extends Core
         $result = false;
         $managerMode = $this->isManagerMode();
         if (!$this->isGuestEnabled() && !$uid && !$managerMode) {
-            $this->addMessage($this->translate('comments.only_users_can_edit'));
+            $this->addMessage($this->translate('comments.only_users_can_create'));
         } else {
             $context = $this->getCFGDef('context', 'site_content');
             $thread = (int)$this->getField('thread', 0);

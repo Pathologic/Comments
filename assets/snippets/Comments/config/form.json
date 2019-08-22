@@ -1,7 +1,7 @@
 {
   "templatePath": "assets/snippets/Comments/tpl/",
-  "templateExtension": "tpl",
-  "formTpl": "@T_FILE:Forms/form",
+  "templateExtension": "php",
+  "formTpl": "@B_FILE:Forms/form",
   "disableSubmit": 1,
   "disableGuests": 0,
   "useCaptchaForGuestsOnly": 1,
@@ -36,7 +36,7 @@
   "rtssIgnore": "api,disableSubmit",
   "context": "site_content",
   "moderation": {
-      "formid": "moderation-form",
-      "config": "moderation:assets/snippets/Comments/config/"
+    "formid": "moderation-form",
+    "config": "moderation:assets/snippets/Comments/config/"
   }
 }

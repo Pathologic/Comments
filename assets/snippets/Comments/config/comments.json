@@ -1,8 +1,8 @@
 {
   "templatePath": "assets/snippets/Comments/tpl/",
-  "templateExtension": "tpl",
-  "wrapTpl": "@T_FILE:TreeView/wrap",
-  "tpl": "@T_FILE:TreeView/comment",
+  "templateExtension": "php",
+  "wrapTpl": "@B_FILE:TreeView/wrap",
+  "tpl": "@B_FILE:TreeView/comment",
   "rtssElement": "TreeViewComments",
   "userType": "user",
   "userFields": "createdby,updatedby,deletedby",

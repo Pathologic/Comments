@@ -1,7 +1,7 @@
 {
   "templatePath": "assets/snippets/Comments/tpl/",
-  "templateExtension": "tpl",
-  "formTpl": "@T_FILE:Moderation/form",
+  "templateExtension": "php",
+  "formTpl": "@B_FILE:Moderation/form",
   "disableSubmit": 1,
   "rules": {
     "comment": {
@@ -30,8 +30,8 @@
   },
   "formControls": ["published", "deleted"],
   "emptyFormControls": {
-      "published": 0,
-      "deleted": 0
+    "published": 0,
+    "deleted": 0
   },
   "moderatedByThreadCreator": 1,
   "contextModel": "\\modResource",

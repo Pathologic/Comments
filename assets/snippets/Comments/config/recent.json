@@ -1,8 +1,8 @@
 {
   "templatePath": "assets/snippets/Comments/tpl/",
-  "templateExtension": "tpl",
+  "templateExtension": "php",
   "display": 10,
-  "tpl": "@T_FILE:recent",
+  "tpl": "@B_FILE:recent",
   "introField": "",
   "contentField": "content",
   "summary": "notags,len:150"

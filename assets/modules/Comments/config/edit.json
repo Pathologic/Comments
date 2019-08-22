@@ -1,7 +1,7 @@
 {
   "templatePath": "assets/modules/Comments/tpl/",
-  "templateExtension": "tpl",
-  "formTpl": "@T_FILE:Forms/edit",
+  "templateExtension": "php",
+  "formTpl": "@B_FILE:Forms/edit",
   "protectSubmit": 0,
   "submitLimit": 0,
   "rules": {

@@ -9,14 +9,14 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="phone">Ваше имя</label>
-                    <input type="text" class="form-control[+name.classname+]" name="name" value="[+name.value+]">
+                    <input type="text" class="form-control" name="name" value="{{ data.name }}">
                     {{ plh['name.error'] | raw }}
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="email">Ваш e-mail</label>
-                    <input type="text" class="form-control[+email.classname+]" name="email" value="[+email.value+]">
+                    <input type="text" class="form-control" name="email" value="{{ data.email }}">
                     {{ plh['email.error'] | raw }}
                 </div>
             </div>
@@ -24,7 +24,7 @@
     {% endif %}
     <div class="form-group">
         <label for="comment">Комментарий</label>
-        <textarea class="form-control" id="comment" placeholder="Напишите сообщение" rows="10" name="comment">{{ comment }}</textarea>
+        <textarea class="form-control" id="comment" placeholder="Напишите сообщение" rows="10" name="comment">{{ data.comment }}</textarea>
         {{ plh['comment.error'] | raw }}
     </div>
     {% block moderation %}{% endblock %}

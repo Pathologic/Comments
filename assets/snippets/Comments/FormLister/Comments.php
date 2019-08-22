@@ -198,7 +198,7 @@ class Comments extends Core
         $uid = $this->modx->getLoginUserID('web');
         $result = false;
         $managerMode = $this->isManagerMode();
-        if (!$uid && !$managerMode) {
+        if (!$this->isGuestEnabled() && !$uid && !$managerMode) {
             $this->addMessage($this->translate('comments.only_users_can_edit'));
         } else {
             $context = $this->getCFGDef('context', 'site_content');

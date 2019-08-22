@@ -1,8 +1,7 @@
 {
   "templatePath": "assets/snippets/Comments/tpl/",
   "templateExtension": "tpl",
-  "formTpl": "@FILE:Moderation/form",
-  "guestFormTpl": "@FILE:Moderation/guestForm",
+  "formTpl": "@T_FILE:Moderation/form",
   "disableSubmit": 1,
   "rules": {
     "comment": {

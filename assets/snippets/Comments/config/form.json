@@ -1,11 +1,12 @@
 {
   "templatePath": "assets/snippets/Comments/tpl/",
   "templateExtension": "tpl",
-  "formTpl": "@FILE:Forms/form",
-  "guestFormTpl": "@FILE:Forms/guestForm",
+  "formTpl": "@T_FILE:Forms/form",
   "disableSubmit": 1,
-  "disableGuests": 1,
+  "disableGuests": 0,
   "useCaptchaForGuestsOnly": 1,
+  "skipPrerender": 1,
+  "prerenderErrors": 1,
   "rules": {
     "comment": {
       "required": "Введите текст комментария"
@@ -31,7 +32,6 @@
     "email":["trim", "email"],
     "comment": ["trim", "compressText"]
   },
-  "skipTpl": "@CODE:<div class=\"alert alert-primary\" role=\"alert\">Только зарегистрированные пользователи могут оставлять комментарии.</div>",
   "rtssElement": "CommentsForm",
   "rtssIgnore": "api,disableSubmit",
   "context": "site_content",

@@ -1,4 +1,5 @@
 ## Comments
+**Требует PHP 7.2, FormLister версии 1.9.0 или выше, DocLister 2.5.0 или выше**
 Набор инструментов для создания комментариев с помощью DocLister и FormLister. В основу положено решение [TreeClosureTable](https://github.com/drandin/TreeClosureTable).
 
 ### Установка

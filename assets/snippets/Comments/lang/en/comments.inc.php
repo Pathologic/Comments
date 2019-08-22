@@ -1,6 +1,7 @@
 <?php
 $_lang = array();
-$_lang['comments.only_users_can_edit'] = 'Only registered users can edit comments.';
+$_lang['comments.only_users_can_edit'] = 'Only registered users are allowed to edit comments.';
+$_lang['comments.only_users_can_create'] = 'Only registered users are allowed to create comments.';
 $_lang['coments.cannot_edit'] = 'You cannot edit this comment.';
 $_lang['coments.cannot_edit'] = 'You cannot edit comment with answers.';
 $_lang['comments.edit_time_expired'] = 'Comment edit time expired.';

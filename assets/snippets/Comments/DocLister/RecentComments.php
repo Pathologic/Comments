@@ -154,27 +154,29 @@ class RecentCommentsDocLister extends DocLister
             $limit = $this->LimitSQL();
             $fields = $this->getCFGDef('selectFields', '`s`.`comments_count`,`c`.*,`g`.`name`,`g`.`email`,`sc`.`pagetitle`,`sc`.`longtitle`');
             $rs = $this->dbQuery("SELECT {$fields} FROM {$from} WHERE `s`.`comments_count` > 0 AND `s`.`last_comment` > 0 AND `c`.`deleted` = 0 AND `c`.`published` = 1 AND `sc`.`deleted` =0 AND `sc`.`published` = 1 ORDER BY `c`.`id` DESC {$limit}");
-            $this->loadExtender('user');
-            /**
-             * @var $extUser user_DL_Extender
-             */
-            if ($extUser = $this->getExtender('user')) {
-                $extUser->init($this, array('fields' => $this->getCFGDef("userFields", "")));
-            }
-
             /**
              * @var $extSummary summary_DL_Extender
              */
             $extSummary = $this->getExtender('summary');
             while ($row = $this->modx->db->getRow($rs)) {
-                if ($extUser) {
-                    $row = $extUser->setUserData($row);
-                }
                 $row['summary'] = $extSummary ? $this->getSummary(
                     $row,
                     $extSummary
                 ) : '';
-                $out[$row['thread']] = $row;
+                $this->_docs[$row['thread']] = $row;
+            }
+            $this->loadExtender('user');
+            /**
+             * @var $extUser user_DL_Extender
+             */
+
+            if ($extUser = $this->getExtender('user')) {
+                $extUser->init($this,
+                    array('fields' => $this->getCFGDef('userFields', 'createdby')));
+                foreach ($this->_docs as &$item) {
+                    $item = $extUser->setUserData($item);
+                }
+                unset($item);
             }
             if ($tvlist != '' && count($this->_docs) > 0) {
                 $tv = $this->extTV->getTVList(array_keys($out), $tvlist);
@@ -182,14 +184,15 @@ class RecentCommentsDocLister extends DocLister
                     $tv = array();
                 }
                 foreach ($tv as $docID => $TVitem) {
-                    if (isset($out[$docID]) && is_array($out[$docID])) {
-                        $out[$docID] = array_merge($out[$docID], $TVitem);
+                    if (isset($this->_docs[$docID]) && is_array($this->_docs[$docID])) {
+                        $this->_docs[$docID] = array_merge($this->_docs[$docID], $TVitem);
                     }
                 }
             }
-            $this->extCache->save($out, 'comments_data');
+            $this->extCache->save($this->_docs, 'comments_data');
+        } else {
+            $this->_docs = $out;
         }
-        $this->_docs = $out;
 
         return $this->_docs;
     }

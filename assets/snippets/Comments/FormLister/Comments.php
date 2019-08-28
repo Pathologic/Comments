@@ -39,6 +39,12 @@ class Comments extends Core
             $this->getCFGDef('modelPath', 'assets/snippets/Comments/model/Comments.php')
         );
         $comment = $this->getCFGDef('id', 0);
+        if ($extendedFields = $this->getCFGDef('extendedFields')) {
+            $extendedFields = $this->config->loadArray($extendedFields);
+            if (!empty($extendedFields)) {
+                $this->comments->setExtendedFields($extendedFields);
+            }
+        }
         if ($comment) {
             $this->mode = 'edit';
             $this->comments->edit($comment);

@@ -118,4 +118,24 @@ trait DocLister
     {
         return !is_null($this->moderation) && $this->moderation->isThreadCreator($uid);
     }
+
+    /**
+     * @param array $ids
+     * @return array
+     */
+    public function getExtendedFields() {
+        $out = array();
+        $names = $this->getCFGDef('extendedFields');
+        $names = $this->sanitarIn($names);
+        $ids = array_keys($this->_docs);
+        if ($ids && $names) {
+            $ids = implode(',', $ids);
+            $q = $this->dbQuery("SELECT * FROM {$this->getTable('comments_extended_fields')} WHERE `id` IN ({$ids}) AND `name` IN ({$names})");
+            while ($row = $this->modx->db->getRow($q)) {
+                $out[$row['id']][$row['name']] = $row['value'];
+            }
+        }
+
+        return $out;
+    }
 }

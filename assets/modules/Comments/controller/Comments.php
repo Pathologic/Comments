@@ -28,7 +28,7 @@ class Comments
         'apiFormat'     => 'array',
         'dir'           => 'assets/snippets/Comments/FormLister/',
         'controller'    => 'Comments',
-        'skipPrerender' => 'true'
+        'skipPrerender' => 1
     ];
 
     /**

@@ -60,7 +60,7 @@ class Comments extends autoTable
      */
     public function beginTransaction ()
     {
-        return $this->modx->db->conn->begin_transaction();
+        return $this->db->beginTransaction();
     }
 
     /**
@@ -68,7 +68,7 @@ class Comments extends autoTable
      */
     public function rollbackTransaction ()
     {
-        return $this->modx->db->conn->rollback();
+        return $this->modx->db->rollbackTransaction();
     }
 
     /**
@@ -76,7 +76,7 @@ class Comments extends autoTable
      */
     public function commitTransaction ()
     {
-        return $this->modx->db->conn->commit();
+        return $this->modx->db->commitTransaction();
     }
 
     /**

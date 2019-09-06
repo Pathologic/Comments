@@ -254,7 +254,7 @@ class Rating {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
         $this->modx->db->query("
-            INSERT INTO {$this->modx->getFullTableName('system_eventnames')} (`name`, `groupname`) VALUES 
+            INSERT IGNORE INTO {$this->modx->getFullTableName('system_eventnames')} (`name`, `groupname`) VALUES 
             ('OnBeforeCommentVote', 'Comments Events'),
             ('OnCommentVote', 'Comments Events')
         ");

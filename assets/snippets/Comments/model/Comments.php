@@ -60,7 +60,7 @@ class Comments extends autoTable
      */
     public function beginTransaction ()
     {
-        return $this->modx->db->begin();
+        return $this->modx->db->begin(0, 'comments');
     }
 
     /**

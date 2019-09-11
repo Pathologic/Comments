@@ -1,5 +1,5 @@
 var sanitize = function(value) {
-    return value
+    return value.toString()
         .replace(/&/g, '&amp;')
         .replace(/>/g, '&gt;')
         .replace(/</g, '&lt;')

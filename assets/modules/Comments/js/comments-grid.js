@@ -148,7 +148,11 @@
                         if (response.messages.length > 0) {
                             self.alert('', response.messages);
                         }
-                        self.reload();
+                        if (ids.length === 1) {
+                            self.updateGridRow(ids[0]);
+                        } else {
+                            self.reload();
+                        }
                     } else {
                         self.alert('error', response.messages);
                     }

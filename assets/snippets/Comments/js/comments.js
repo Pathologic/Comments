@@ -598,7 +598,7 @@
                     options.text = messages;
                     new Noty(options).show();
                 } else {
-                    alert(messages);
+                    alert(item);
                 }
             }
         },

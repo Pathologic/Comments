@@ -36,6 +36,12 @@ class Moderation extends Core
         );
         $this->lexicon->fromFile('moderation', $this->getCFGDef('lang', $this->modx->getConfig('lang_code')), $this->getCFGDef('langDir', 'assets/snippets/Comments/lang/'));
         $this->log('Lexicon loaded', array('lexicon' => $this->lexicon->getLexicon()));
+        if ($extendedFields = $this->getCFGDef('extendedFields')) {
+            $extendedFields = $this->config->loadArray($extendedFields);
+            if (!empty($extendedFields)) {
+                $this->comments->setExtendedFields($extendedFields);
+            }
+        }
         if ($id = $this->getCFGDef('id', 0)) {
             $this->comments->edit($id);
         }

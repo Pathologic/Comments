@@ -374,6 +374,12 @@ class TreeViewDocLister extends DocLister
                 unset($item);
             }
             $this->fixGaps();
+            if ($extendedFields = $this->getExtendedFields()) {
+                foreach ($extendedFields as $key => $value) {
+                    $this->_docs[$key] += $value;
+                }
+            }
+
             $this->order = $this->buildFlatTree();
             $this->extCache->save($this->_docs, 'comments_data' . ($this->isModerator() ? '_moderation' : ''));
             $this->extCache->save($this->relations, 'comments_relations');

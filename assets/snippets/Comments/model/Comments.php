@@ -15,6 +15,7 @@ use RuntimeSharedSettings;
 class Comments extends autoTable
 {
     use Messages;
+    use ExtendedFields;
     protected $tree_table = 'comments_tree';
     protected $table = 'comments';
     protected $guests_table = 'comments_guests';
@@ -54,13 +55,12 @@ class Comments extends autoTable
         $this->stat = Stat::getInstance($modx);
     }
 
-
     /**
      * @return bool
      */
     public function beginTransaction ()
     {
-        return $this->modx->db->conn->begin_transaction();
+        return $this->modx->db->begin();
     }
 
     /**
@@ -68,7 +68,7 @@ class Comments extends autoTable
      */
     public function rollbackTransaction ()
     {
-        return $this->modx->db->conn->rollback();
+        return $this->modx->db->rollback();
     }
 
     /**
@@ -76,7 +76,7 @@ class Comments extends autoTable
      */
     public function commitTransaction ()
     {
-        return $this->modx->db->conn->commit();
+        return $this->modx->db->commit();
     }
 
     /**
@@ -146,6 +146,7 @@ class Comments extends autoTable
             LEFT JOIN {$this->makeTable($this->guests_table)} `g` ON `c`.`id` = `g`.`id` 
             WHERE `t`.`idDescendant`=`t`.`idAncestor` AND `c`.`id`={$id}");
             $this->fromArray($this->modx->db->getRow($result));
+            $this->fromArray($this->loadExtendedFields($id));
             $this->store($this->toArray());
             $this->id = $this->eraseField($this->pkName);
             if (is_bool($this->id) && $this->id === false) {
@@ -255,6 +256,7 @@ class Comments extends autoTable
                 $out = parent::save($fire_events, $clearCache);
                 if ($out) {
                     $this->saveGuestData($out);
+                    $this->saveExtendedFields($out);
                 }
                 if ($out && ($this->isChanged('published') || $this->isChanged('deleted'))) {
                     $this->stat
@@ -602,6 +604,7 @@ class Comments extends autoTable
                 if ($idNewEntry = parent::save()) {
                     if ($idNewEntry > 0) {
                         $this->saveGuestData($idNewEntry);
+                        $this->saveExtendedFields($idNewEntry);
                         $sql = "INSERT INTO {$this->makeTable($this->tree_table)} (`idAncestor`, `idDescendant`, `idNearestAncestor`, `level`)
                                  SELECT `idAncestor`, {$idNewEntry}, {$id}, {$level}
                                    FROM {$this->makeTable($this->tree_table)}
@@ -717,24 +720,6 @@ class Comments extends autoTable
     }
 
     /**
-     * @param array $fields
-     */
-    public function setExtendedFields($fields = array()) {
-        if (is_array($fields)) {
-            $this->extended_fields = $fields;
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getExtendedFields() {
-        return $this->extended_fields;
-    }
-
-    /**
      * @return bool
      */
     protected function isManagerMode() {
@@ -796,6 +781,18 @@ class Comments extends autoTable
             ON DELETE CASCADE ON UPDATE CASCADE,
             CONSTRAINT `commentsTree_ibfk_2` 
             FOREIGN KEY (`idDescendant`) 
+            REFERENCES {$this->makeTable($this->table)} (`id`) 
+            ON DELETE CASCADE ON UPDATE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ");
+        $this->modx->db->query("
+            CREATE TABLE IF NOT EXISTS {$this->makeTable($this->extended_fields_table)} (
+            `id` int(11) NOT NULL,
+            `name` varchar(255) NOT NULL DEFAULT '',
+            `value` text NOT NULL,
+            PRIMARY KEY (`id`, `name`),
+            CONSTRAINT `comments_extended_fields_ibfk_1` 
+            FOREIGN KEY (`id`) 
             REFERENCES {$this->makeTable($this->table)} (`id`) 
             ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

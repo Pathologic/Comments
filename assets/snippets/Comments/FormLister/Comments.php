@@ -39,6 +39,12 @@ class Comments extends Core
             $this->getCFGDef('modelPath', 'assets/snippets/Comments/model/Comments.php')
         );
         $comment = $this->getCFGDef('id', 0);
+        if ($extendedFields = $this->getCFGDef('extendedFields')) {
+            $extendedFields = $this->config->loadArray($extendedFields);
+            if (!empty($extendedFields)) {
+                $this->comments->setExtendedFields($extendedFields);
+            }
+        }
         if ($comment) {
             $this->mode = 'edit';
             $this->comments->edit($comment);
@@ -199,7 +205,7 @@ class Comments extends Core
         $result = false;
         $managerMode = $this->isManagerMode();
         if (!$this->isGuestEnabled() && !$uid && !$managerMode) {
-            $this->addMessage($this->translate('comments.only_users_can_edit'));
+            $this->addMessage($this->translate('comments.only_users_can_create'));
         } else {
             $context = $this->getCFGDef('context', 'site_content');
             $thread = (int)$this->getField('thread', 0);

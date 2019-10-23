@@ -3,7 +3,7 @@
   "templateExtension": "php",
   "formTpl": "@B_FILE:Forms/form",
   "disableSubmit": 1,
-  "disableGuests": 0,
+  "disableGuests": 1,
   "useCaptchaForGuestsOnly": 1,
   "skipPrerender": 1,
   "prerenderErrors": 1,

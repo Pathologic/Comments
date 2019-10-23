@@ -56,7 +56,7 @@
                 @endif
             </span>
             <span class="createdon">
-                {{ $data['createdon'] | date($DocLister->translate('dateFormat')) }}
+                {{ date($DocLister->translate('dateFormat'), strtotime($data['createdon'])) }}
             </span>
             <span class="comment-link">
                 <a href="{{ $modx->makeUrl($data['thread']) . '#comment-' . $data['id']}}">#</a>
@@ -70,7 +70,7 @@
             @if ($data['updatedon'] != '0000-00-00 00:00:00')
                 <div class="small">
                     {{ $DocLister->translate('edited_by') }} {{ $editor['name'] }}
-                    {{ empty($data['updatedon']) ? date($DocLister->translate('dateFormat')) : $data['updatedon'] }}</div>
+                    {{ date($DocLister->translate('dateFormat'), strtotime($data['updatedon'])) }}</div>
             @endif
         </div>
         @if ($DocLister->isModerator())

@@ -11,14 +11,14 @@
     </div>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-xs-6">
+            <div class="col-6 col-xs-6">
                 <div class="form-group">
                     <label class="checkbox-inline">
                         <input type="checkbox" name="published" value="1" {{ $data['published'] ? 'checked' : '' }}> {{ $FormLister->translate('module.form.published') }}
                     </label>
                 </div>
             </div>
-            <div class="col-xs-6">
+            <div class="col-6 col-xs-6">
                 <div class="form-group">
                     <label class="checkbox-inline">
                         <input type="checkbox" name="deleted" value="1" {{ $data['deleted'] ? 'checked' : '' }}> {{ $FormLister->translate('module.form.deleted') }}
@@ -30,14 +30,14 @@
     @if ($data['createdby'] == 0)
         <div class="container-fluid">
         <div class="row">
-            <div class="col-xs-6">
+            <div class="col-6 col-xs-6">
                 <div class="form-group">
                     <label for="name">{{ $FormLister->translate('module.form.name') }}</label>
                     <input type="text" name="name" class="form-control" value="{{ $data['name'] }}">
                     {!! $plh['name.error'] !!}
                 </div>
             </div>
-            <div class="col-xs-6">
+            <div class="col-6 col-xs-6">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="text" name="email" class="form-control" value="{{ $data['email'] }}">
@@ -49,10 +49,10 @@
     @endif
     <div class="container-fluid">
         <div class="row form-group">
-            <div class="col-xs-6">
+            <div class="col-6 col-xs-6">
                 <b>{{ $FormLister->translate('module.form.context') }}:</b> {{ $data['context'] }}
             </div>
-            <div class="col-xs-6">
+            <div class="col-6 col-xs-6">
                 <b>{{ $FormLister->translate('module.form.resource') }}:</b> {{ $data['thread'] }}
                 @if ($data['context'] == 'site_content' && $data['resource'])
                     (<a href="{{ MODX_MANAGER_URL . 'index.php?a=27&id=' . $data['thread'] }}" target="main">{{ $data['resource'] }}</a>)
@@ -62,7 +62,7 @@
     </div>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-xs-4">
+            <div class="col-4 col-xs-4">
                 <b>{{ $FormLister->translate('module.form.createdon') }}:</b><br>{{ $data['createdon'] }}<br>
                 @if ($data['user.username.createdby'])
                     <a class="user" href="{{ MODX_MANAGER_URL . 'index.php?a=88&id=' . $data['createdby'] }}" target="main">{{ $data['user.username.createdby'] }}</a>
@@ -73,7 +73,7 @@
                 @endif
             </div>
             @if ($data['updatedby'] != 0)
-                <div class="col-xs-4">
+                <div class="col-4 col-xs-4">
                     <b>{{ $FormLister->translate('module.form.updatedon') }}:</b><br>@if ($data['updatedon'] != "0000-00-00 00:00:00") {{ $data['updatedon'] }} <br> @endif
                     @if ($data['user.username.updatedby'])
                         <a class="user" href="{{ MODX_MANAGER_URL . 'index.php?a=88&id=' . $data['updatedby'] }}" target="main">{{ $data['user.username.updatedby'] }}</a>
@@ -83,7 +83,7 @@
                 </div>
             @endif
             @if ($data['deletedby'] != 0)
-                <div class="col-xs-4">
+                <div class="col-4 col-xs-4">
                     <b>{{ $FormLister->translate('module.form.deletedon') }}:</b><br>
                     @if ($data['deletedon'] != '0000-00-00 00:00:00')
                         {{ $data['deletedon'] }} <br>

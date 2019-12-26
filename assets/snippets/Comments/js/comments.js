@@ -26,7 +26,8 @@
             previewBtnClass: 'comment-preview',
             editableClass: 'editable',
             formDisabledClass: 'disabled',
-
+            formPosition: 'append',
+            saveFormFields: ['name', 'email'],
             thread: 0,
             lastComment: 0,
             notifyOptions: {},
@@ -69,6 +70,7 @@
     }
 
     Comments.prototype = {
+        store: {},
         init: function () {
             var self = this;
             if (parseInt(self._options.thread) === 0 || $('form', self._options.formWrapper).length === 0) return;
@@ -133,8 +135,27 @@
             var self = this;
             $(self._options.formWrapper).remove();
             var form = self.createForm();
-            form.insertAfter(self._options.commentsWrapper);
+            if (self._options.formPosition === 'append') {
+                form.insertAfter(self._options.commentsWrapper);
+            } else {
+                form.insertBefore(self._options.commentsWrapper);
+            }
             self.initForm(form);
+        },
+        saveData: function (data) {
+            if (typeof data === 'object') {
+                this.store = data;
+            }
+        },
+        loadData: function(form) {
+            var fields = this._options.saveFormFields;
+            for (var i = 0; i < fields.length; i++) {
+                var field = fields[i];
+                var el = $('input[name="' + field + '"]', form);
+                if (el.length && typeof this.store[field] !== 'undefined') {
+                    el.val(this.store[field]);
+                }
+            }
         },
         initForm: function (form) {
             var self = this;
@@ -166,6 +187,7 @@
                 var form = $('form', self._options.formWrapper);
                 self.preview(form);
             });
+            this.loadData(form);
             if (typeof self._options.onInitFormCallback === 'function') {
                 setTimeout(function () {
                     self._options.onInitFormCallback(self);
@@ -210,6 +232,7 @@
                 function (response) {
                     self.enableForm();
                     if (response.status) {
+                        self.saveData(response.fields);
                         self.cancelReply();
                         if (response.hasOwnProperty('captcha')) {
                             self.updateCaptcha(response.captcha);
@@ -253,6 +276,7 @@
                     self.enableForm();
                     self.updateCaptcha(response.captcha);
                     if (response.status) {
+                        self.saveData(response.fields);
                         self.cancelReply();
                         if (response.messages.length > 0) {
                             self.alert('success', response.messages);

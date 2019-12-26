@@ -52,7 +52,8 @@ class Comments extends Core
             $this->mode = 'create';
         }
         $this->lexicon->fromFile('form');
-        $this->lexicon->fromFile('comments', $this->getCFGDef('lang', $this->modx->getConfig('lang_code')), $this->getCFGDef('langDir', 'assets/snippets/Comments/lang/'));
+        $this->lexicon->fromFile('comments', $this->getCFGDef('lang', $this->modx->getConfig('lang_code')),
+            $this->getCFGDef('langDir', 'assets/snippets/Comments/lang/'));
         $this->log('Lexicon loaded', array('lexicon' => $this->lexicon->getLexicon()));
 
     }
@@ -227,6 +228,7 @@ class Comments extends Core
         if ($result) {
             $this->setFields($this->comments->toArray());
             $this->setFormStatus(true);
+            $this->saveFormFields();
             if (empty($this->getCFGDef('successTpl')) && !$extMessages) {
                 $this->addMessage($this->translate('comments.comment_saved'));
             }
@@ -273,28 +275,32 @@ class Comments extends Core
     /**
      * @return bool
      */
-    protected function isManagerMode() {
+    protected function isManagerMode ()
+    {
         return defined('IN_MANAGER_MODE') && IN_MANAGER_MODE === true;
     }
 
     /**
      * @return string
      */
-    public function getMode() {
+    public function getMode ()
+    {
         return $this->mode;
     }
 
     /**
      * @return bool
      */
-    public function isGuest() {
+    public function isGuest ()
+    {
         return !$this->modx->getLoginUserID('web');
     }
 
     /**
      * @return bool
      */
-    public function isGuestEnabled() {
+    public function isGuestEnabled ()
+    {
         return !(int)$this->getCFGDef('disableGuests', 1);
     }
 
@@ -309,5 +315,14 @@ class Comments extends Core
         }
 
         return !empty($messages);
+    }
+
+    public function saveFormFields ()
+    {
+        $store = 'store_' . $this->getFormId();
+        $fields = $this->config->loadArray($this->getCFGDef('saveFormData', 'name,email'));
+        foreach ($fields as $field) {
+            $_SESSION[$store][$field] = $this->getField($field);
+        }
     }
 }

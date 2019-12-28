@@ -21,10 +21,10 @@ class TreeViewDocLister extends DocLister
     public $mode = 'comments';
     public $lastComment = 0;
     public $commentsCount = 0;
-    protected $order = array();
-    protected $hidden = array();
-    protected $relations = array();
-    protected $lexicon = null;
+    protected $order = [];
+    protected $hidden = [];
+    protected $relations = [];
+    protected $lexicon;
 
     /**
      * Конструктор контроллеров DocLister
@@ -177,7 +177,33 @@ class TreeViewDocLister extends DocLister
         if ($trackNew) {
             $lastView = LastView::getInstance($this->modx)->getLastView($this->getCFGDef('thread'), $this->getContext());
         }
+        $enableRating = (bool)$this->getCFGDef('rating', 1);
+        $uid = $this->modx->getLoginUserID('web');
+        if ($enableRating) {
+            $this->getRating()->getRated();
+        }
         foreach ($this->_docs as &$item) {
+            $item['rateable'] = $enableRating;
+            if ($enableRating) {
+                if (isset($this->rating[$item['id']])) {
+                    $item['rating'] = $this->rating[$item['id']];
+                } else {
+                    $item['rating'] = [
+                        'like' => 0,
+                        'dislike' => 0,
+                        'count' => 0,
+                        'rating' => 0
+                    ];
+                }
+                if ($this->isRated($item['id']) || !$uid || $item['createdby'] == $uid) {
+                    $item['classes'][] = $this->getCFGDef('ratedClass', 'rated');
+                }
+                if ($item['rating']['count'] > 0) {
+                    $item['classes'][] = $this->getCFGDef('positiveClass', 'positive');
+                } elseif ($item['rating']['count'] < 0) {
+                    $item['classes'][] = $this->getCFGDef('negativeClass', 'negative');
+                }
+            }
             $editable = $this->isEditable($item);
             if ($editable) {
                 $item['editable'] = (bool)$editable;
@@ -199,6 +225,7 @@ class TreeViewDocLister extends DocLister
                 $item['new'] = true;
                 $item['classes'][] = $this->getCFGDef('newClass', 'new');
             }
+
             $item['classes'][] = $this->getCFGDef('levelClass', 'level') . $item['level'];
         }
         unset($item);
@@ -414,7 +441,7 @@ class TreeViewDocLister extends DocLister
      * @param int $idAncestor
      * @return array
      */
-    private function buildFlatTree ($idAncestor = 0, &$out = array())
+    protected function buildFlatTree ($idAncestor = 0, &$out = array())
     {
         if (isset($this->relations[$idAncestor])) {
             foreach ($this->relations[$idAncestor] as $idAncestor) {
@@ -461,7 +488,7 @@ class TreeViewDocLister extends DocLister
      * @param int $idAncestor
      * @return array|null
      */
-    private function buildHierarchyArrayTree ($idAncestor = 0)
+    protected function buildHierarchyArrayTree ($idAncestor = 0)
     {
         $tree = array();
         if (is_int($idAncestor) && $idAncestor >= 0) {

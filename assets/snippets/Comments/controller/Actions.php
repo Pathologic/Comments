@@ -4,6 +4,7 @@ use DocumentParser;
 use RuntimeSharedSettings;
 use Helpers\Config;
 use Helpers\Lexicon;
+use Comments\Rating as CommentsRating;
 
 /**
  * Class Actions
@@ -11,11 +12,11 @@ use Helpers\Lexicon;
  */
 class Actions
 {
-    protected $modx = null;
-    protected $moderation = null;
-    protected $commentsConfig = null;
-    protected $formConfig = null;
-    protected $lexicon = null;
+    protected $modx;
+    protected $moderation;
+    protected $commentsConfig;
+    protected $formConfig;
+    protected $lexicon;
     protected $ahCommentsElement = 'TreeViewComments';
     protected $ahFormElement = 'CommentsForm';
     protected $thread = 0;
@@ -240,6 +241,59 @@ class Actions
     public function remove ()
     {
         $this->callModelMethod('remove', 'comments_remove', 'actions.error_remove');
+    }
+
+    /**
+     *
+     */
+    public function like()
+    {
+        if ($this->commentsConfig->getCFGDef('rating', 1) && $this->thread && $this->id) {
+            $data = CommentsRating::getInstance($this->modx);
+            $result = $data->like($this->id, true, true);
+            $messages = $data->getMessages();
+            if ($result) {
+                $out = $data->get($this->id);
+                if (!empty($messages)) {
+                    $out['messages'] = $messages;
+                }
+                $out['status'] = true;
+            } else {
+                $out['status'] = false;
+                if (!empty($messages)) {
+                    $out['messages'] = $messages;
+                }
+            }
+            $this->setResult($out);
+        } else {
+            $this->setResult(false, $this->lexicon->get('actions.error'));
+        }
+    }
+
+    /**
+     *
+     */
+    public function dislike () {
+        if ($this->commentsConfig->getCFGDef('rating', 1) && $this->thread && $this->id) {
+            $data = CommentsRating::getInstance($this->modx);
+            $result = $data->dislike($this->id, true, true);
+            $messages = $data->getMessages();
+            if ($result) {
+                $out = $data->get($this->id);
+                if (!empty($messages)) {
+                    $out['messages'] = $messages;
+                }
+                $out['status'] = true;
+            } else {
+                $out['status'] = false;
+                if (!empty($messages)) {
+                    $out['messages'] = $messages;
+                }
+            }
+            $this->setResult($out);
+        } else {
+            $this->setResult(false, $this->lexicon->get('actions.error'));
+        }
     }
 
     /**

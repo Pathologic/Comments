@@ -79,6 +79,15 @@
 #comments .comment.deleted .comment-moderation .comment-undelete{
     display:inline-block;
 }
+#comments .comment .rating .like {
+    margin-left: 5px;
+}
+#comments .comment .rating .dislike {
+    margin-right: 5px;
+}
+#comments .comment.rated .rating .like, #comments .comment.rated .rating .dislike {
+    display:none;
+}
 .recent-comments {
     padding:15px;
     margin-bottom:15px;

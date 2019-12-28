@@ -5,7 +5,7 @@
  * addition to Comments
  * 
  * @category    plugin
- * @version     1.1.0
+ * @version     1.2.0
  * @internal    @events OnEmptyTrash,OnWebDeleteUser
  * @internal    @modx_category Content
  * @internal    @disabled 0

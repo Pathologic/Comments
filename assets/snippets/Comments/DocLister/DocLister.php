@@ -8,6 +8,8 @@ trait DocLister
 {
     protected $context = 'site_content';
     public $moderation = null;
+    protected $rating = [];
+    protected $rated = [];
 
     protected function initModeration ()
     {
@@ -54,6 +56,15 @@ trait DocLister
         }
 
         return $out;
+    }
+
+    /**
+     * @param int $commentId
+     * @return bool
+     */
+    public function isRated ($commentId)
+    {
+        return in_array($commentId, $this->rated);
     }
 
     /**
@@ -137,5 +148,50 @@ trait DocLister
         }
 
         return $out;
+    }
+
+    /**
+     * @return DocLister
+     */
+    public function getRating() {
+        $rating = $this->extCache->load('comments_rating');
+        if ($rating === false) {
+            $ids = array_keys($this->_docs);
+            if ($ids) {
+                $ids = implode(',', $ids);
+                $q = $this->dbQuery("SELECT * FROM {$this->getTable('comments_rating')} WHERE `comment` IN ({$ids})");
+                while ($row = $this->modx->db->getRow($q)) {
+                    $id = $row['comment'];
+                    unset($row['comment']);
+                    $row['count'] = $row['like'] - $row['dislike'];
+                    if ($row['count'] > 0) {
+                        $row['count'] = '+' . $row['count'];
+                    }
+                    $this->rating[$id] = $row;
+                }
+                $this->extCache->save($this->rating, 'comments_rating');
+            }
+        } else {
+            $this->rating = $rating;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return DocLister
+     */
+    public function getRated() {
+        $ids = array_keys($this->rating);
+        $uid = $this->modx->getLoginUserID('web');
+        if ($uid && $ids) {
+            $ids = implode(',', $ids);
+            $q = $this->dbQuery("SELECT `comment` FROM {$this->getTable('comments_rating_log')} WHERE `comment` IN ({$ids}) AND `uid`={$uid}");
+            while ($row = $this->modx->db->getRow($q)) {
+                $this->rated[] = $row['comment'];
+            }
+        }
+
+        return $this;
     }
 }

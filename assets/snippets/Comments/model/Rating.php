@@ -2,6 +2,7 @@
 
 use APIhelpers;
 use Comments\Traits\Messages;
+use Doctrine\Common\Cache\Cache;
 use DocumentParser;
 
 /**
@@ -64,7 +65,7 @@ class Rating {
         $commentId = (int)$commentId;
         $out = true;
         $uid = (int)$this->modx->getLoginUserID('web');
-        if ($uid && $this->getComment($commentId) && (int)$this->comment->get('createdby') !== $uid) {
+        if ($uid && $this->getComment($commentId) && (int)$this->comment->get('createdby') !== $uid && !$this->isVoted($commentId)) {
             $result = $this->modx->invokeEvent('OnBeforeCommentVote', [
                 'vote'    => 'dislike',
                 'comment' => $this->comment
@@ -86,8 +87,9 @@ class Rating {
                     $this->addMessages($result);
                 }
                 if ($clearCache) {
-                    $this->comment->dropCache($this->comment->get('thread'), $this->comment->get('context'))->dropCache();
+                    $this->dropCache($this->comment->get('thread'), $this->comment->get('context'));
                 }
+                $this->saveVote($commentId, 'like');
             }
         }
 
@@ -105,7 +107,7 @@ class Rating {
         $commentId = (int)$commentId;
         $out = true;
         $uid = (int)$this->modx->getLoginUserID('web');
-        if ($uid && $this->getComment($commentId) && (int)$this->comment->get('createdby') !== $uid) {
+        if ($uid && $this->getComment($commentId) && (int)$this->comment->get('createdby') !== $uid && !$this->isVoted($commentId)) {
             $result = $this->modx->invokeEvent('OnBeforeCommentVote', [
                 'vote'    => 'dislike',
                 'comment' => $this->comment
@@ -127,8 +129,9 @@ class Rating {
                     $this->addMessages($result);
                 }
                 if ($clearCache) {
-                    $this->comment->dropCache($this->comment->get('thread'), $this->comment->get('context'))->dropCache();
+                    $this->dropCache($this->comment->get('thread'), $this->comment->get('context'));
                 }
+                $this->saveVote($commentId, 'dislike');
             }
         }
 
@@ -170,7 +173,8 @@ class Rating {
         if ($commentId && $uid) {
             $vote = $vote == 'like' ? 'like' : 'dislike';
             $ip = APIhelpers::getUserIP();
-            $this->modx->db->query("INSERT IGNORE INTO {$this->modx->getFullTableName($this->logTable)} (`comment`,`uid`, `vote`, `ip`) VALUES ({$commentId}, {$uid}, '{$vote}', '{$ip}')");
+            $createdon = date('Y-m-d H:i:s', time() + $this->modx->getConfig('server_offset_time'));
+            $this->modx->db->query("INSERT IGNORE INTO {$this->modx->getFullTableName($this->logTable)} (`comment`,`uid`, `vote`, `ip`, `createdon`) VALUES ({$commentId}, {$uid}, '{$vote}', '{$ip}', '{$createdon}')");
         }
     }
 
@@ -216,8 +220,26 @@ class Rating {
                 'rating' => 0
             ];
         }
+        $out['count'] = $out['like'] - $out['dislike'];
 
         return $out;
+    }
+
+    /**
+     * @param int $thread
+     * @param string $context
+     * @return Rating
+     */
+    public function dropCache ($thread = 0, $context = '')
+    {
+        if (isset($this->modx->cache) && ($this->modx->cache instanceof Cache)) {
+            if ($thread && $context) {
+                $key = $context . '_' . $thread . '_comments_rating';
+                $this->modx->cache->delete($key);
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -245,7 +267,6 @@ class Rating {
                 `vote` varchar(7) NOT NULL,
                 `ip` varchar(16) NOT NULL DEFAULT '0.0.0.0',
                 `createdon` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-                PRIMARY KEY `comment` (`comment`),
                 CONSTRAINT `comments_rating_log_ibfk_1`
                 FOREIGN KEY (`comment`) 
                 REFERENCES {$this->modx->getFullTableName('comments')} (`id`) 

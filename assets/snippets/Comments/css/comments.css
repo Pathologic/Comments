@@ -33,7 +33,7 @@
     margin:15px 0;
 }
 #comments .level0 {
-    margin-left:0px;
+    margin-left:0;
 }
 #comments .level1 {
     margin-left:20px;
@@ -50,6 +50,23 @@
 #comments .comment .comment-head {
     background:#eee;
     padding:5px 10px;
+    display: flex;
+    flex-direction: row;
+}
+#comments .comment .rating {
+    margin-left:auto;
+}
+#comments .comment .userdata .username, #comments .comment .userdata .createdon  {
+    display: block;
+}
+#comments .comment .userdata .username {
+    font-weight: bold;
+}
+#comments .comment .userdata .createdon {
+    font-size:0.8em;
+}
+#comments .comment .comment-links {
+    margin:0 15px;
 }
 #comments .comment .comment-body {
     padding:15px 0;
@@ -79,14 +96,40 @@
 #comments .comment.deleted .comment-moderation .comment-undelete{
     display:inline-block;
 }
+#comments .comment .rating .like, #comments .comment .rating .dislike {
+    display: inline-block;
+    width:20px;
+    height:20px;
+    font-size:20px;
+    line-height:20px;
+    color:#fff;
+    text-align:center;
+    vertical-align: middle;
+    border-radius: 4px;
+}
+#comments .comment .rating .like:hover, #comments .comment .rating .dislike:hover {
+    text-decoration: none;
+    opacity:.6;
+}
 #comments .comment .rating .like {
-    margin-left: 5px;
+    background: green;
 }
 #comments .comment .rating .dislike {
-    margin-right: 5px;
+    background: red;
 }
 #comments .comment.rated .rating .like, #comments .comment.rated .rating .dislike {
     display:none;
+}
+#comments .comment .rating .rating-count {
+    margin:0 10px;
+    font-weight: bold;
+    vertical-align: middle;
+}
+#comments .comment.positive .rating .rating-count {
+    color:green;
+}
+#comments .comment.negative .rating .rating-count {
+    color:red;
 }
 .recent-comments {
     padding:15px;

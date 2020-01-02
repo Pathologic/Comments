@@ -10,6 +10,15 @@
             commentsCountWrapperClass: 'comments-count-wrap',
             commentsCountClass: 'comments-count',
             noCommentsClass: 'no-comments',
+            ratedClass: 'rated',
+            positiveRatingClass: 'positive',
+            negativeRatingClass: 'negative',
+            ratingCountClass: 'rating-count',
+            likeCountClass: 'like-count',
+            dislikeCountClass: 'dislike-count',
+            likeBtnClass: 'like',
+            dislikeBtnClass: 'dislike',
+            subscribeWrapperClass: 'comments-subscription',
             formWrapperClass: 'comments-form-wrap',
             captchaWrapperClass: 'captcha-wrapper',
             replyBtnClass: 'comment-reply',
@@ -47,6 +56,7 @@
             commentsCountWrapper: '.' + this._options.commentsCountWrapperClass,
             commentsCount: '.' + this._options.commentsCountClass,
             noComments: '.' + this._options.noCommentsClass,
+            subscribeWrapper: '.' + this._options.subscribeWrapperClass,
             formWrapper: '.' + this._options.formWrapperClass,
             captchaWrapper: '.' + this._options.captchaWrapperClass,
             replyBtn: '.' + this._options.replyBtnClass,
@@ -60,7 +70,9 @@
             publishBtn: '.' + this._options.publishBtnClass,
             unpublishBtn: '.' + this._options.unpublishBtnClass,
             removeBtn: '.' + this._options.removeBtnClass,
-            editBtn: '.' + this._options.editBtnClass
+            editBtn: '.' + this._options.editBtnClass,
+            likeBtn: '.' + this._options.likeBtnClass,
+            dislikeBtn: '.' + this._options.dislikeBtnClass,
         });
         if (typeof window.commentsLexicon === 'object') {
             this._options.lexicon = window.commentsLexicon;
@@ -111,6 +123,21 @@
                 e.preventDefault();
                 $(self._options.formWrapper).remove();
                 self.loadForm(self.getCommentId(this), 'edit');
+            }).on('click', self._options.likeBtn, function(e) {
+                e.preventDefault();
+                var commentId = self.getCommentId(this);
+                self.rate(commentId, 'like');
+            }).on('click', self._options.dislikeBtn, function(e) {
+                e.preventDefault();
+                var commentId = self.getCommentId(this);
+                self.rate(commentId, 'dislike');
+            });
+            $(self._options.subscribeWrapper).on('change', 'input[name="subscribe"]', function(){
+                if ($(this).is(':checked')) {
+                    self.changeSubscription('subscribe');
+                } else {
+                    self.changeSubscription('unsubscribe');
+                }
             });
             var form = $(self._options.formWrapper);
             self._form = form.html();
@@ -443,6 +470,67 @@
                                 }
                             }
                         });
+                    }
+                },
+                'json'
+            ).fail(function (xhr) {
+                self.handleAjaxError(xhr);
+            });
+        },
+        rate: function(commentId, action) {
+            var self = this;
+            var data = {
+                action: action === 'like' ? 'like' : 'dislike',
+                thread: self._options.thread,
+                id: commentId
+            };
+            var comment = $('#comment-' + commentId);
+            var ratingCount = $('.' + self._options.ratingCountClass, comment);
+            var likeCount = $('.' + self._options.likeCountClass, comment);
+            var dislikeCount = $('.' + self._options.dislikeCountClass, comment);
+            if (comment.hasClass(self._options.ratedClass)) {
+                return;
+            }
+            $.post(self._options.connector,
+                data,
+                function (response) {
+                    if (response.status) {
+                        comment.addClass(self._options.ratedClass).removeClass(self._options.positiveRatingClass, self._options.negativeRatingClass);
+                        var count = response.count;
+                        var like = response.like;
+                        var dislike = response.dislike;
+                        if (response.count > 0) {
+                            count = '+' + count;
+                            comment.addClass(self._options.positiveRatingClass);
+                        } else if (response.count < 0) {
+                            comment.addClass(self._options.negativeRatingClass);
+                        }
+                        ratingCount.text(count);
+                        likeCount.text(like);
+                        dislikeCount.text(dislike);
+                    }
+                    if (response.messages.length > 0) {
+                        self.alert(response.status ? 'success' : 'error', response.messages);
+                    }
+                },
+                'json'
+            ).fail(function (xhr) {
+                self.handleAjaxError(xhr);
+            });
+        },
+        changeSubscription: function(action) {
+            var self = this;
+            var data = {
+                action: action === 'subscribe' ? 'subscribe' : 'unsubscribe',
+                thread: self._options.thread
+            };
+            $.post(self._options.connector,
+                data,
+                function (response) {
+                    if (response.status) {
+                        self.alert('success', self.translate('subscription_updated'));
+                    } else {
+                        $('input[name="subscribe"]', self._options.subscribeWrapper).prop('checked', action !== 'subscribe');
                     }
                 },
                 'json'

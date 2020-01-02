@@ -121,7 +121,7 @@ class TreeViewDocLister extends DocLister
         $this->setFiltersJoin("LEFT JOIN {$this->getTable('comments_guests')} `g` ON `c`.`id` = `g`.`id`");
         $this->setFiltersJoin("JOIN {$this->getTable('comments_tree')} `t` ON `c`.`id` = `t`.`idDescendant`");
         $this->initModeration();
-        if ($this->mode == 'comments') {
+        if ($this->mode == 'comments' && $this->getCFGDef('rtss', 1)) {
             $this->saveSettings();
         }
     }
@@ -131,7 +131,7 @@ class TreeViewDocLister extends DocLister
      * @return string
      */
     public function translate($message) {
-        return $this->lexicon->get($message);
+         return $this->lexicon->get($message);
     }
 
     protected function saveSettings ()

@@ -11,6 +11,7 @@ use RuntimeSharedSettings;
 /**
  * Class Tree
  * @package Comments
+ * @property Stat $stat
  */
 class Comments extends autoTable
 {
@@ -20,7 +21,7 @@ class Comments extends autoTable
     protected $table = 'comments';
     protected $guests_table = 'comments_guests';
     protected $pkName = 'id';
-    protected $default_field = array(
+    protected $default_field = [
         'createdby'  => 0,
         'updatedby'  => 0,
         'deletedby'  => 0,
@@ -33,14 +34,14 @@ class Comments extends autoTable
         'ip'         => '',
         'thread'     => 0,
         'context'    => 'site_content'
-    );
-    protected $tree_default_field = array(
+    ];
+    protected $tree_default_field = [
         'idAncestor'        => 0,
         'idDescendant'      => 0,
         'idNearestAncestor' => 0,
         'level'             => 0
-    );
-    protected $extended_fields = array();
+    ];
+    protected $extended_fields = [];
 
     protected $stat;
 
@@ -814,6 +815,7 @@ class Comments extends autoTable
         RuntimeSharedSettings::getInstance($this->modx)->createTable();
         LastView::getInstance($this->modx)->createTable();
         Rating::getInstance($this->modx)->createTable();
+        Subscriptions::getInstance($this->modx)->createTable();
     }
 
 }

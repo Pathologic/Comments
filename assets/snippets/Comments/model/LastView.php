@@ -5,11 +5,12 @@ use DocumentParser;
 /**
  * Class LastView
  * @package Comments
+ * @property DocumentParser $modx
  */
 class LastView
 {
     protected $table = 'comments_lastview';
-    protected $modx = null;
+    protected $modx;
     protected static $instance;
 
     /**

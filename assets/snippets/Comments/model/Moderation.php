@@ -1,23 +1,27 @@
 <?php namespace Comments;
 
+use autoTable;
 use DocumentParser;
 use Helpers\Config;
 
 /**
  * Class Moderation
  * @package Comments
+ * @property DocumentParser $modx
+ * @property autoTable $data
+ * @property Config $cfg
  */
 class Moderation
 {
-    protected $modx = null;
-    protected $data = null;
-    protected $cfg = array();
+    protected $modx;
+    protected $data;
+    protected $cfg;
 
     /**
      * Moderation constructor.
      * @param DocumentParser $modx
      */
-    public function __construct (DocumentParser $modx, array $cfg = array())
+    public function __construct (DocumentParser $modx, array $cfg = [])
     {
         $this->modx = $modx;
         $this->cfg = new Config($cfg);

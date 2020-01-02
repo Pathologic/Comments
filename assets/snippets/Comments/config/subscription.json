@@ -1,0 +1,6 @@
+{
+  "templatePath": "assets/snippets/Comments/tpl/",
+  "templateExtension": "tpl",
+  "tpl": "@T_FILE:subscription",
+  "context": "site_content"
+}

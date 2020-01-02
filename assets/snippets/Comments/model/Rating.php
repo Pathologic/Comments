@@ -8,13 +8,16 @@ use DocumentParser;
 /**
  * Class Rating
  * @package Comments
+ * @property DocumentParser $modx
+ * @property Comments $comment
  */
 class Rating {
     use Messages;
+    protected $modx;
+    protected $comment;
     protected $table = 'comments_rating';
     protected $logTable = 'comments_rating_log';
-    protected $modx = null;
-    protected $comment = null;
+
     protected static $instance;
 
     /**

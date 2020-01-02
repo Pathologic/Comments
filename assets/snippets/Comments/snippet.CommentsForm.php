@@ -1,12 +1,12 @@
 <?php
 include_once(MODX_BASE_PATH . 'assets/snippets/Comments/autoload.php');
-$_params = array_merge(array(
+$_params = array_merge([
     'config'=>'form:assets/snippets/Comments/config/',
     'dir'=>'assets/snippets/Comments/FormLister/',
     'controller'=>'Comments',
     'formid'=>'comments-form',
     'thread' => $modx->documentIdentifier
-    ), $params
+    ], $params
 );
 
 return $modx->runSnippet('FormLister', $_params);

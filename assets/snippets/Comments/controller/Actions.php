@@ -1,14 +1,24 @@
 <?php namespace Comments;
 
 use DocumentParser;
+use Exception;
 use RuntimeSharedSettings;
 use Helpers\Config;
 use Helpers\Lexicon;
-use Comments\Rating as CommentsRating;
 
 /**
  * Class Actions
  * @package Comments
+ * @property DocumentParser $modx
+ * @property Moderation $moderation
+ * @property Config $commentsConfig
+ * @property Config $formConfig
+ * @property Lexicon $lexicon
+ * @property string $context
+ * @property int $thread
+ * @property int $id
+ * @property int $parent
+ * @property int $lastComment
  */
 class Actions
 {
@@ -24,13 +34,13 @@ class Actions
     protected $parent = 0;
     protected $id = 0;
     protected $lastComment = 0;
-    protected $result = array();
-    public $formConfigOverride = array(
+    protected $result = [];
+    public $formConfigOverride = [
         'disableSubmit' => 0,
         'api'           => 2,
         'apiFormat'     => 'array',
         'rtssElement'   => ''
-    );
+    ];
 
     /**
      * Actions constructor.
@@ -204,7 +214,7 @@ class Actions
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function publish ()
     {
@@ -212,7 +222,7 @@ class Actions
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function unpublish ()
     {
@@ -220,7 +230,7 @@ class Actions
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function delete ()
     {
@@ -228,7 +238,7 @@ class Actions
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function undelete ()
     {
@@ -236,7 +246,7 @@ class Actions
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function remove ()
     {
@@ -249,7 +259,7 @@ class Actions
     public function like()
     {
         if ($this->commentsConfig->getCFGDef('rating', 1) && $this->thread && $this->id) {
-            $data = CommentsRating::getInstance($this->modx);
+            $data = Rating::getInstance($this->modx);
             $result = $data->like($this->id, true, true);
             $messages = $data->getMessages();
             if ($result) {
@@ -275,7 +285,7 @@ class Actions
      */
     public function dislike () {
         if ($this->commentsConfig->getCFGDef('rating', 1) && $this->thread && $this->id) {
-            $data = CommentsRating::getInstance($this->modx);
+            $data = Rating::getInstance($this->modx);
             $result = $data->dislike($this->id, true, true);
             $messages = $data->getMessages();
             if ($result) {
@@ -294,6 +304,20 @@ class Actions
         } else {
             $this->setResult(false, $this->lexicon->get('actions.error'));
         }
+    }
+
+    public function subscribe() {
+        if ($this->thread) {
+            Subscriptions::getInstance($this->modx)->subscribe($this->thread, $this->context);
+        }
+        $this->setResult(['status' => true]);
+    }
+
+    public function unsubscribe() {
+        if ($this->thread) {
+            Subscriptions::getInstance($this->modx)->unsubscribe($this->thread, $this->context);
+        }
+        $this->setResult(['status' => true]);
     }
 
     /**
@@ -342,6 +366,7 @@ class Actions
     protected function getCFGDef ($config, $key, $default = '')
     {
         $config = $config . 'Config';
+        $out = $default;
         if (isset($this->$config)) {
             $out = $this->$config->getCFGDef($key, $default);
         }

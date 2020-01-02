@@ -91,7 +91,7 @@ class Comments extends Core
      */
     public function render ()
     {
-        if (!$this->isSubmitted() && !$this->isManagerMode()) {
+        if (!$this->isSubmitted() && !$this->isManagerMode() && $this->getCFGDef('rtss', 1)) {
             $this->saveSettings();
         } elseif ($this->checkSubmitLimit() || $this->checkSubmitProtection()) {
             $this->renderForm();

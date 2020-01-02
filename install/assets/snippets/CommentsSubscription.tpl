@@ -1,8 +1,8 @@
 //<?php
 /**
- * Comments
+ * CommentsSubscription
  *
- * snippet to list comments
+ * snippet to get status of the new comments subscription
  *
  * @category    snippet
  * @version     1.3.0
@@ -12,4 +12,4 @@
  * @author      Pathologic (https://github.com/pathologic)
  */
 
-return require MODX_BASE_PATH . 'assets/snippets/Comments/snippet.Comments.php';
+return require MODX_BASE_PATH . 'assets/snippets/Comments/snippet.CommentsSubscription.php';

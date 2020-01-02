@@ -5,7 +5,7 @@
  * snippet to list recent commented resources
  *
  * @category    snippet
- * @version     1.2.0
+ * @version     1.3.0
  * @license     http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
  * @internal    @modx_category Content
  * @internal    @installset base, sample

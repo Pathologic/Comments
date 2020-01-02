@@ -3,6 +3,8 @@
 
 Набор инструментов для создания комментариев с помощью DocLister и FormLister. В основу положено решение [TreeClosureTable](https://github.com/drandin/TreeClosureTable).
 
+**Шаблонизация MODX не поддерживается!**
+
 ### Установка
 1. Установить FormLister версии 1.9.0 или выше.
 2. Установить DocLister из GIT.

@@ -5,11 +5,12 @@ use DocumentParser;
 /**
  * Class Stat
  * @package Comments
+ * @property DocumentParser $modx
  */
 class Stat
 {
     protected $table = 'comments_stat';
-    protected $modx = null;
+    protected $modx;
     protected static $instance;
 
     /**

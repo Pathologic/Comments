@@ -2,10 +2,11 @@
 
 /**
  * Class RuntimeSharedSettings
+ * @property DocumentParser $modx
  */
 class RuntimeSharedSettings  {
     protected static $instance;
-    protected $modx = null;
+    protected $modx;
     public $table = 'rtss';
 
     /**

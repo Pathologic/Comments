@@ -1,7 +1,7 @@
 {% if data.createdby == '-1' %}
     {% set author = {name: DocLister.translate('admin')} %}
 {% elseif data.createdby == '0' %}
-    {% set author = {name: DocLister.translate('guest')} %}
+    {% set author = {name: DocLister.translate('guest') ~ ' ' ~  data.name, email: data.email} %}
 {% else %}
     {% set author = {name: data['user.fullname.createdby'] | default(data['user.username.createdby']) |  default(DocLister.translate('deleted_user')), email: data['user.email.createdby'] | default('-')} %}
 {% endif %}

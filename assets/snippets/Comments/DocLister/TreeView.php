@@ -230,7 +230,8 @@ class TreeViewDocLister extends DocLister
         }
         unset($item);
         $this->commentsCount = $count;
-        $this->lastComment = (int)end(array_keys($this->_docs));
+        $keys = array_keys($this->_docs);
+        $this->lastComment = (int)end($keys);
         if ($trackNew) {
             LastView::getInstance($this->modx)->setLastView($this->lastComment, $this->getCFGDef('thread'), $this->getContext());
         }

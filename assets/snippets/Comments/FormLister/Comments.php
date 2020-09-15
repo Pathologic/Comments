@@ -258,7 +258,7 @@ class Comments extends Core
             } else {
                 $fields['updatedby'] = $uid;
             }
-            $result = $this->comments->fromArray($fields)->save();
+            $result = $this->comments->fromArray($fields)->save(true, true);
         }
         if ($result) {
             $this->setFormStatus(true);

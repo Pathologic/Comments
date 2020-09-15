@@ -103,11 +103,15 @@
             e.preventDefault();
             var el = $(this);
             var id = el.hasClass('btn-extra') ? undefined : parseInt(el.attr('href'));
-            var actions = ['publish', 'unpublish', 'delete', 'undelete', 'remove'];
-            for (var i = 0; i < actions.length; i++) {
-                if (el.hasClass(actions[i])) {
-                    self.changeProperty(actions[i], id);
-                    break;
+            if (el.hasClass('remove')) {
+                self.remove(id);
+            } else {
+                var actions = ['publish', 'unpublish', 'delete', 'undelete'];
+                for (var i = 0; i < actions.length; i++) {
+                    if (el.hasClass(actions[i])) {
+                        self.changeProperty(actions[i], id);
+                        break;
+                    }
                 }
             }
         });
@@ -172,9 +176,9 @@
             $.messager.confirm(self.translate('remove_wnd_title'), self.translate('remove_confirm'), function (r) {
                 if (r && ids.length > 0) {
                     $.post(
-                        this._options.url,
+                        self._options.url,
                         {
-                            action: action,
+                            action: 'comments/remove',
                             ids: ids
                         },
                         function (response) {

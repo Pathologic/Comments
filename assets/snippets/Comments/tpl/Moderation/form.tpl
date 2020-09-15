@@ -1,4 +1,4 @@
-{{ extends 'Forms/form.tpl' }}
+{% extends 'Forms/form.tpl' %}
 {% block moderation %}
     <div class="form-group">
         <label class="checkbox-inline">

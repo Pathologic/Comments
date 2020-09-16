@@ -22,7 +22,7 @@
         </div>
     {% else %}
         <div class="comment-head">
-            <div class="userdata"><span class="username">{{ author.name }}{% if DocLister.isModerator() %} ({{ author.email | default('-') }}){% endif %}</span> <span class="createdon">{{ data.createdon | date(DocLister.translate('dateFormat')) }}</span></div><div class="comment-links"><span class="comment-link"><a href="{{ makeUrl(data.thread) ~ '#comment-' ~ data.id}}">#</a> {% if data.idNearestAncestor %}<a href="{{ makeUrl(data.thread) ~ '#comment-' ~ data.idNearestAncestor}}">↑</a>{% endif %}</span></div>{% if data.rateable %}<div class="rating"><a href="#" class="dislike">&minus;</a><span class="rating-count">{{ data.rating.count }}</span><a href="#" class="like">+</a></div>{% endif %}
+            <div class="userdata"><span class="username">{{ author.name }}{% if DocLister.isModerator() %} ({{ author.email | default('-') }}){% endif %}</span> <span class="createdon">{{ data.createdon | date(DocLister.translate('dateFormat')) }}</span></div><div class="comment-links"><span class="comment-link"><a href="{{ makeUrl(data.thread) ~ '#comment-' ~ data.id}}">#</a> {% if data.idNearestAncestor and data.level %}<a href="{{ makeUrl(data.thread) ~ '#comment-' ~ data.idNearestAncestor}}">↑</a>{% endif %}</span></div>{% if data.rateable %}<div class="rating"><a href="#" class="dislike">&minus;</a><span class="rating-count">{{ data.rating.count }}</span><a href="#" class="like">+</a></div>{% endif %}
         </div>
         <div class="comment-body">
             {{ data.content | raw }}

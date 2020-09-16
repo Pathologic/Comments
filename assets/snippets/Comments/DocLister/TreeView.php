@@ -427,6 +427,7 @@ class TreeViewDocLister extends DocLister
     public function fixGaps ()
     {
         foreach ($this->hidden as $id => $idNearestAncestor) {
+            if (!isset($this->relations[$id])) continue;
             foreach ($this->relations[$id] as $_id) {
                 if (!isset($this->_docs[$_id])) continue;
                 $this->_docs[$_id]['idNearestAncestor'] = $idNearestAncestor;

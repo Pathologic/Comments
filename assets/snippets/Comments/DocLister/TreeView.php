@@ -428,11 +428,14 @@ class TreeViewDocLister extends DocLister
     {
         foreach ($this->hidden as $id => $idNearestAncestor) {
             foreach ($this->relations[$id] as $_id) {
+                if (!isset($this->_docs[$_id])) continue;
                 $this->_docs[$_id]['idNearestAncestor'] = $idNearestAncestor;
             }
             $children = $this->buildFlatTree($id);
             foreach ($children as $child) {
-                $this->_docs[$child]['level'] += -1;
+                if (isset($this->_docs[$child])) {
+                    $this->_docs[$child]['level'] += -1;
+                }
             }
         }
     }

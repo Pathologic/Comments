@@ -74,7 +74,6 @@ class TreeViewDocLister extends DocLister
                 'cache' => 0
             ));
         }
-        $this->loadLang(array('core', 'json'));
         $this->setDebug($this->getCFGDef('debug', 0));
         if ($this->checkDL()) {
             $this->alias = empty($this->alias) ? $this->getCFGDef(
@@ -100,14 +99,14 @@ class TreeViewDocLister extends DocLister
 
         $this->setLocate();
 
-        if ($this->getCFGDef("customLang")) {
-            $this->getCustomLang();
-        }
         $this->lexicon = new Lexicon($modx, array(
             'langDir' => 'assets/snippets/Comments/lang/',
             'lang'    => $this->getCFGDef('lang', $this->modx->getConfig('lang_code')),
             'handler' => $this->getCFGDef('lexiconHandler')
         ));
+        if ($this->getCFGDef("customLang")) {
+            $this->getCustomLang();
+        }
         $this->lexicon->fromFile('treeview');
         $this->loadExtender($this->getCFGDef("extender", ""));
         $DLTemplate = DLTemplate::getInstance($modx);

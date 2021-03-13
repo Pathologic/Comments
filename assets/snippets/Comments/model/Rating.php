@@ -269,7 +269,7 @@ class Rating {
                 `uid` INT(11) NOT NULL,
                 `vote` varchar(7) NOT NULL,
                 `ip` varchar(16) NOT NULL DEFAULT '0.0.0.0',
-                `createdon` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+                `createdon` timestamp,
                 CONSTRAINT `comments_rating_log_ibfk_1`
                 FOREIGN KEY (`comment`) 
                 REFERENCES {$this->modx->getFullTableName('comments')} (`id`) 

@@ -71,7 +71,7 @@
             </div>
             {% if data.updatedby != 0 %}
                 <div class="col-md-4">
-                    <b>{{ FormLister.translate('module.form.updatedon') }}:</b><br>{% if data.updatedon != '0000-00-00 00:00:00' %}{{ data.updatedon }} <br>{% endif %}
+                    <b>{{ FormLister.translate('module.form.updatedon') }}:</b><br>{% if data.updatedon %}{{ data.updatedon }} <br>{% endif %}
                     {% if data['user.username.updatedby'] %}
                     <a class="user" href="{{ constant('MODX_MANAGER_URL') ~ 'index.php?a=88&id=' ~ data.updatedby }}" target="main">{{ data['user.username.updatedby'] }}</a>
                     {% else %}
@@ -81,7 +81,7 @@
             {% endif %}
             {% if data.deletedby != 0 %}
                 <div class="col-md-4">
-                    <b>{{ FormLister.translate('module.form.deletedon') }}:</b><br>{% if data.deletedon != '0000-00-00 00:00:00' %}{{ data.deletedon }} <br>{% endif %}{% if data['user.username.deletedby'] %}
+                    <b>{{ FormLister.translate('module.form.deletedon') }}:</b><br>{% if data.deletedon %}{{ data.deletedon }} <br>{% endif %}{% if data['user.username.deletedby'] %}
                     <a class="user" href="{{ constant('MODX_MANAGER_URL') ~ 'index.php?a=88&id=' ~ data.deletedby }}" target="main">{{ data['user.username.deletedby'] }}</a>
                     {% else %}
                         {{ data.deletedby }}

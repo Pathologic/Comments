@@ -154,8 +154,8 @@ class Stat
             CREATE TABLE IF NOT EXISTS {$this->modx->getFullTableName('comments_stat')} (
                 `context` varchar(255) NOT NULL,
                 `thread` int(11) NOT NULL,
-                `last_comment` int(11) NOT NULL,
-                `comments_count` int(11) NOT NULL,
+                `last_comment` int(11) NULL,
+                `comments_count` int(11) NOT NULL DEFAULT 0,
                 UNIQUE KEY `thread` (`thread`, `context`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");

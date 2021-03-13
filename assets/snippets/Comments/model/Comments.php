@@ -25,8 +25,8 @@ class Comments extends autoTable
         'createdby'  => 0,
         'updatedby'  => 0,
         'deletedby'  => 0,
-        'updatedon'  => '0000-00-00 00:00:00',
-        'deletedon'  => '0000-00-00 00:00:00',
+        'updatedon'  => null,
+        'deletedon'  => null,
         'deleted'    => 0,
         'published'  => 1,
         'rawcontent' => '',
@@ -237,6 +237,11 @@ class Comments extends autoTable
         $mode = $this->newDoc ? 'create' : 'update';
         $thread = $this->get('thread');
         $context = $this->get('context');
+        if ($this->isManagerMode()) {
+            $uid = -1;
+        } else {
+            $uid = (int)$this->modx->getLoginUserID('web');
+        }
         if (!$this->newDoc) {
             $result = $this->getInvokeEventResult('OnBeforeCommentSave', [
                 'mode'    => $mode,
@@ -249,13 +254,25 @@ class Comments extends autoTable
                 $out = false;
                 $this->addMessages($result);
             } else {
-                if ($this->isChanged('rawcontent') || (!$this->get('createdby') && ($this->isChanged('name') || $this->isChanged('email'))) || $this->isChanged('published') || $this->isChanged('deleted')) {
+                if ($this->isChanged('rawcontent') || (!$this->get('createdby') && ($this->isChanged('name') || $this->isChanged('email'))) || $this->isChanged('published')) {
                     $this->set('updatedon', date('Y-m-d H:i:s', $this->getTime(time())));
+                    $this->set('updatedby', $uid);
                 } else {
                     $this->eraseField('updatedby');
                 }
+                if ($this->isChanged('deleted')) {
+                    if ($this->get('deleted')) {
+                        $this->set('deletedon', date('Y-m-d H:i:s', $this->getTime(time())));
+                        $this->set('deletedby', $uid);
+                    } else {
+                        $this->eraseField('deletedby');
+                    }
+                }
                 $out = parent::save($fire_events, $clearCache);
                 if ($out) {
+                    if ($this->isChanged('deleted') && !$this->get('deleted')) {
+                        $this->query("UPDATE {$this->makeTable($this->table)} SET `deletedon`=null WHERE `id`={$out}");
+                    }
                     $this->saveGuestData($out);
                     $this->saveExtendedFields($out);
                 }
@@ -386,8 +403,7 @@ class Comments extends autoTable
             } else {
                 $id = $this->sanitarIn($_ids);
                 if (!empty($id)) {
-                    $deletedon = '0000-00-00 00:00:00';
-                    $q = $this->query("UPDATE {$this->makeTable($this->table)} SET `deleted`=0, `deletedby`=0, `deletedon`='{$deletedon}' WHERE `id` IN ({$id})");
+                    $q = $this->query("UPDATE {$this->makeTable($this->table)} SET `deleted`=0, `deletedby`=0, `deletedon`=null WHERE `id` IN ({$id})");
                     if ($out = $this->modx->db->getAffectedRows($q)) {
                         $result = $this->getInvokeEventResult('OnCommentsUndelete', [
                             'ids' => $_ids
@@ -594,6 +610,7 @@ class Comments extends autoTable
     {
         $out = false;
         $idNewEntry = 0;
+        $this->eraseField('updatedon');
         if ($id >= 0) {
             $id = $this->exists($id)
                 ? (int)$id
@@ -744,9 +761,9 @@ class Comments extends autoTable
             `published` tinyint(1) NOT NULL DEFAULT 0,
             `rawcontent` text NOT NULL,
             `content` text NOT NULL,
-            `createdon` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            `updatedon` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-            `deletedon` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+            `createdon` timestamp DEFAULT CURRENT_TIMESTAMP,
+            `updatedon` timestamp NULL,
+            `deletedon` timestamp NULL,
             `ip` varchar(16) NOT NULL DEFAULT '0.0.0.0',
             PRIMARY KEY (`id`),
             KEY `id_idx` (`id`,`createdby`),

@@ -49,7 +49,7 @@
                     if (row.deleted === '1') {
                         state.push(commentsModuleLexicon.grid_isdeleted);
                     }
-                    if (row.updatedon !== '0000-00-00 00:00:00') {
+                    if (row.updatedon !== null) {
                         state.push(commentsModuleLexicon.grid_ischanged + row.updatedon + '</b>');
                     }
                     value += state.join('; ');

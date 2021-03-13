@@ -26,7 +26,7 @@
         </div>
         <div class="comment-body">
             {{ data.content | raw }}
-            {% if data.updatedon != '0000-00-00 00:00:00' %}
+            {% if data.updatedon %}
                 <div class="small">{{ DocLister.translate('edited_by') }} {{ editor.name }} {{ data.updatedon | date(DocLister.translate('dateFormat')) }}</div>
             {% endif %}
         </div>

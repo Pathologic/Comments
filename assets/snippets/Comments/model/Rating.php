@@ -53,7 +53,7 @@ class Rating {
     /**
      *
      */
-    private function __wakeup ()
+    public function __wakeup ()
     {
     }
 
@@ -258,8 +258,8 @@ class Rating {
                 `rating` FLOAT NOT NULL DEFAULT 0,
                 PRIMARY KEY `comment` (`comment`),
                 CONSTRAINT `comments_rating_ibfk_1`
-                FOREIGN KEY (`comment`) 
-                REFERENCES {$this->modx->getFullTableName('comments')} (`id`) 
+                FOREIGN KEY (`comment`)
+                REFERENCES {$this->modx->getFullTableName('comments')} (`id`)
                 ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
@@ -271,14 +271,14 @@ class Rating {
                 `ip` varchar(16) NOT NULL DEFAULT '0.0.0.0',
                 `createdon` timestamp,
                 CONSTRAINT `comments_rating_log_ibfk_1`
-                FOREIGN KEY (`comment`) 
-                REFERENCES {$this->modx->getFullTableName('comments')} (`id`) 
+                FOREIGN KEY (`comment`)
+                REFERENCES {$this->modx->getFullTableName('comments')} (`id`)
                 ON DELETE CASCADE ON UPDATE CASCADE,
                 UNIQUE KEY `vote` (`comment`, `uid`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
         $this->modx->db->query("
-            INSERT IGNORE INTO {$this->modx->getFullTableName('system_eventnames')} (`name`, `groupname`) VALUES 
+            INSERT IGNORE INTO {$this->modx->getFullTableName('system_eventnames')} (`name`, `groupname`) VALUES
             ('OnBeforeCommentVote', 'Comments Events'),
             ('OnCommentVote', 'Comments Events')
         ");

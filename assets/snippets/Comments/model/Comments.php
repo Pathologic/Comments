@@ -61,7 +61,9 @@ class Comments extends autoTable
      */
     public function beginTransaction ()
     {
-        return $this->modx->db->begin(0, 'comments');
+        $this->modx->db->begin();
+
+        return true;
     }
 
     /**
@@ -70,6 +72,8 @@ class Comments extends autoTable
     public function rollbackTransaction ()
     {
         return $this->modx->db->rollback();
+
+        return true;
     }
 
     /**
@@ -78,6 +82,8 @@ class Comments extends autoTable
     public function commitTransaction ()
     {
         return $this->modx->db->commit();
+
+        return true;
     }
 
     /**
@@ -134,7 +140,7 @@ class Comments extends autoTable
         if ($this->getID() != $id) {
             $this->close();
             $this->newDoc = false;
-            $result = $this->query("SELECT 
+            $result = $this->query("SELECT
                 `c`.*,
                 `g`.`name`,
                 `g`.`email`,
@@ -143,8 +149,8 @@ class Comments extends autoTable
                 `t`.`idNearestAncestor`,
                 `t`.`level`
             FROM {$this->makeTable($this->table)} `c`
-            JOIN {$this->makeTable($this->tree_table)} `t` ON `c`.`id` = `t`.`idDescendant` 
-            LEFT JOIN {$this->makeTable($this->guests_table)} `g` ON `c`.`id` = `g`.`id` 
+            JOIN {$this->makeTable($this->tree_table)} `t` ON `c`.`id` = `t`.`idDescendant`
+            LEFT JOIN {$this->makeTable($this->guests_table)} `g` ON `c`.`id` = `g`.`id`
             WHERE `t`.`idDescendant`=`t`.`idAncestor` AND `c`.`id`={$id}");
             $this->fromArray($this->modx->db->getRow($result));
             $this->fromArray($this->loadExtendedFields($id));
@@ -286,7 +292,9 @@ class Comments extends autoTable
             if (!$thread || empty($context)) {
                 return false;
             }
-            $this->set('createdon', date('Y-m-d H:i:s', $this->getTime(time())));
+            if (!$this->issetField('createdon')) {
+                $this->set('createdon', date('Y-m-d H:i:s', $this->getTime(time())));
+            }
             $this->set('ip', APIhelpers::getUserIP());
             if (!$this->issetField('createdby')) {
                 $this->set('createdby', $this->modx->getLoginUserID('web'));
@@ -776,9 +784,9 @@ class Comments extends autoTable
             `name` varchar(255) NOT NULL DEFAULT '',
             `email` varchar(255) NOT NULL DEFAULT '',
             PRIMARY KEY (`id`),
-            CONSTRAINT `comments_guests_ibfk_1` 
-            FOREIGN KEY (`id`) 
-            REFERENCES {$this->makeTable($this->table)} (`id`) 
+            CONSTRAINT `comments_guests_ibfk_1`
+            FOREIGN KEY (`id`)
+            REFERENCES {$this->makeTable($this->table)} (`id`)
             ON DELETE CASCADE ON UPDATE CASCADE,
             KEY `email` (`email`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -793,13 +801,13 @@ class Comments extends autoTable
             KEY `idDescendant` (`idDescendant`),
             KEY `main` (`idAncestor`,`idDescendant`,`idNearestAncestor`,`level`),
             KEY `idNearestAncestor` (`idNearestAncestor`),
-            CONSTRAINT `commentsTree_ibfk_1` 
-            FOREIGN KEY (`idAncestor`) 
-            REFERENCES {$this->makeTable($this->table)} (`id`) 
+            CONSTRAINT `commentsTree_ibfk_1`
+            FOREIGN KEY (`idAncestor`)
+            REFERENCES {$this->makeTable($this->table)} (`id`)
             ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT `commentsTree_ibfk_2` 
-            FOREIGN KEY (`idDescendant`) 
-            REFERENCES {$this->makeTable($this->table)} (`id`) 
+            CONSTRAINT `commentsTree_ibfk_2`
+            FOREIGN KEY (`idDescendant`)
+            REFERENCES {$this->makeTable($this->table)} (`id`)
             ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
@@ -809,14 +817,14 @@ class Comments extends autoTable
             `name` varchar(255) NOT NULL DEFAULT '',
             `value` text NOT NULL,
             PRIMARY KEY (`id`, `name`),
-            CONSTRAINT `comments_extended_fields_ibfk_1` 
-            FOREIGN KEY (`id`) 
-            REFERENCES {$this->makeTable($this->table)} (`id`) 
+            CONSTRAINT `comments_extended_fields_ibfk_1`
+            FOREIGN KEY (`id`)
+            REFERENCES {$this->makeTable($this->table)} (`id`)
             ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
         $this->query("
-            INSERT IGNORE INTO {$this->makeTable('system_eventnames')} (`name`, `groupname`) VALUES 
+            INSERT IGNORE INTO {$this->makeTable('system_eventnames')} (`name`, `groupname`) VALUES
             ('OnBeforeCommentSave', 'Comments Events'),
             ('OnCommentSave', 'Comments Events'),
             ('OnBeforeCommentsDelete', 'Comments Events'),

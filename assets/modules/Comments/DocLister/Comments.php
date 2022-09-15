@@ -56,7 +56,8 @@ class CommentsDocLister extends onetableDocLister
         }
         if ($users) {
             $ids = implode(',', $users);
-            $q = $this->dbQuery("SELECT `id`,`username` FROM {$this->getTable('web_users')} WHERE `id` IN ({$ids})");
+            $users_table = $this->getTable(class_exists('EvolutionCMS\Core') ? 'users' : 'web_users');
+            $q = $this->dbQuery("SELECT `id`,`username` FROM {$users_table} WHERE `id` IN ({$ids})");
             $users = [];
             while ($row = $this->modx->db->getRow($q)) {
                 $users[$row['id']] = $row['username'];

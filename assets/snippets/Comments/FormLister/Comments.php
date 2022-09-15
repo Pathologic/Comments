@@ -285,6 +285,7 @@ class Comments extends Core
 
     /**
      * @return bool
+     * @return bool
      */
     protected function isManagerMode ()
     {

@@ -839,34 +839,6 @@
             if (typeof this._options.lexicon[key] !== 'undefined') {
                 return this._options.lexicon[key];
             }
-        },
-        uploader: {
-            upload: function(files) {
-
-            },
-            clear: function() {
-                upload.replaceWith(upload = upload.clone( true ));
-            },
-            delete: function() {
-                var file = tv.val();
-                $.post(
-                    settings.siteUrl+'assets/tvs/FastImage/ajax.php',
-                    {
-                        mode:'delete',
-                        file:file,
-                        class:settings.classname,
-                        documentData: settings.documentData
-                    },
-                    function(data) {
-                        data = JSON.parse(data);
-                        if (data.success !== undefined && data.success == true) {
-                            tv.val('');
-                            $('.fi-image', placeholder).attr('src', settings.siteUrl + 'assets/tvs/FastImage/images/noimage.png');
-                            deleteBtn.addClass('disabled');
-                        }
-                    }
-                );
-            },
         }
     };
     window.Comments = Comments;

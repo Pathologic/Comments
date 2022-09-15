@@ -130,11 +130,9 @@ class Files extends \autoTable
         $_ids = $this->cleanIDs($ids);
         $result = $this->query("SELECT * FROM {$this->makeTable($this->table)} WHERE `id` IN ({$_ids})");
 
-        if ($this->modx->db->getRecordCount($result)) {
-            while($row = $this->modx->db->getRow($result)) {
-                $this->fs->unlink($row['file']);
-                $this->fs->unlink($this->getThumbPath($row['file']));
-            }
+        while($row = $this->modx->db->getRow($result)) {
+            $this->fs->unlink($row['file']);
+            $this->fs->unlink($this->getThumbPath($row['file']));
         }
 
         $this->delete($ids, $fire_events);

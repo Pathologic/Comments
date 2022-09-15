@@ -29,6 +29,11 @@ $data->createTable();
   });
 </script>
 ```
+Для загрузки картинок дополнительно:
+```
+<script src="assets/js/fileapi/FileAPI/FileAPI.min.js">
+```
+
 6. Разместить вызовы сниппетов в шаблоне:
 ```
 [!Comments!]

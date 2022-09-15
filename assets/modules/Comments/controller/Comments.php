@@ -251,7 +251,9 @@ class Comments
             }
             if (!empty($users)) {
                 $_users = implode(',', $users);
-                $q = $modx->db->query("SELECT * FROM {$modx->getFullTableName('web_users')} `u` LEFT JOIN {$modx->getFullTableName('web_user_attributes')} `ua` ON `u`.`id`=`ua`.`internalKey` WHERE `u`.`id` IN ($_users)");
+                $users_table = $modx->getFullTableName(class_exists('EvolutionCMS\Core') ? 'users' : 'web_users');
+                $user_attributes_table = $modx->getFullTableName(class_exists('EvolutionCMS\Core') ? 'user_attributes' : 'web_user_attributes');
+                $q = $modx->db->query("SELECT * FROM {$users_table} `u` LEFT JOIN {$user_attributes_table} `ua` ON `u`.`id`=`ua`.`internalKey` WHERE `u`.`id` IN ($_users)");
                 $_users = array();
                 while ($row = $modx->db->getRow($q)) {
                     unset($row['password'], $row['sessionid'], $row['cachepwd'], $row['internalKey']);
@@ -266,7 +268,8 @@ class Comments
             $thread = $comments->get('thread');
             $context = $comments->get('context');
             if ($context == 'site_content' && $thread) {
-                $doc = new \modResource($modx);
+                $model = $FormLister->getCFGDef('contextModel', '\\modResource');
+                $doc = new $model($modx);
                 $doc->edit($thread);
                 if ($doc->getID()) {
                     $FormLister->setField('resource', $doc->get('pagetitle'));

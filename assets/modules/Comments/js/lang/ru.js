@@ -26,5 +26,7 @@ var commentsModuleLexicon = {
     grid_ischanged: 'Изменен ',
     grid_isdeleted: 'Удален',
     grid_isunpublished: 'Скрыт',
-    grid_comments_count: 'Количество комментариев'
+    grid_comments_count: 'Количество комментариев',
+    comment: 'Комментарий',
+    attachments: 'Файлы'
 };

@@ -320,6 +320,52 @@ class Actions
         $this->setResult(['status' => true]);
     }
 
+    public function uploadAttachment()
+    {
+        $data = new Files($this->modx);
+        $data->setThumbnailOptions($this->getCFGDef('form', 'thumbOptions', 'w=150&h=150&far=C&bg=FFFFFF'));
+        if ($this->getCFGDef('form', 'attachImages') && !empty($_FILES['file']) && !$_FILES['file']['error'] && is_uploaded_file($_FILES['file']['tmp_name'])) {
+            $this->setResult(['status' => true, 'id' => $data->getID() . '-' . $data->get('hash')]);
+            $allowedImages = $this->formConfig->loadArray($this->getCFGDef('form', 'allowedImages', 'jpg,jpeg,gif,png,svg'));
+            $maxFileSize = $this->getCFGDef('form', 'maxFileSize', 10) * 1024 * 1024;
+            $uploadDir = $this->getCFGDef('form', 'uploadDir', 'assets/images/upload/');
+            $name = $_FILES['file']['name'];
+            if (!$data->checkFileType($name, $allowedImages)) return $this->setResult(['success'=>false,'message'=>$this->lexicon->get('actions.upload_wrong_type')]);
+            if (!$data->checkFileSize($name, $maxFileSize)) return $this->setResult(['success'=>false,'message'=>$this->lexicon->get('actions.upload_wrong_size')]);
+            if ($uploadDir = $data->prepareUploadDir($uploadDir)) {
+                $name = $data->prepareName($uploadDir . $data->stripName($name));
+                if (@move_uploaded_file($_FILES['file']['tmp_name'], MODX_BASE_PATH . $uploadDir . $name)) {
+                    $result = $data->upload([
+                        'file'=>$uploadDir . $name,
+                    ]);
+                    if ($result) {
+                        $attachment = \DLTemplate::getInstance($this->modx)->setTemplatePath($this->getCFGDef('form', 'templatePath'))->setTemplateExtension($this->getCFGDef('form', 'templateExtension'))->parseChunk($this->getCFGDef('form', 'attachmentTpl'), $result);
+                        $this->setResult(['status' => true, 'attachment' => $attachment]);
+                    } else {
+                        $this->setResult(['status' => false, $this->lexicon->get('actions.error')]);
+                    }
+                } else {
+                    $this->setResult(false, $this->lexicon->get('actions.error'));
+                }
+            } else {
+                $this->setResult(false, $this->lexicon->get('actions.error'));
+            }
+        } else {
+            $this->setResult(false, $this->lexicon->get('actions.error'));
+        }
+    }
+
+    public function deleteAttachment()
+    {
+        if (!empty($_POST['id']) && is_scalar($_POST['id'])) {
+            $data = new Files($this->modx);
+            $data->deleteFiles($data->getIdsByHash($_POST['id']));
+            $this->setResult(['status' => true]);
+        } else {
+            $this->setResult(false, $this->lexicon->get('actions.error'));
+        }
+    }
+
     /**
      * @param $method
      * @param $permission
@@ -353,7 +399,7 @@ class Actions
      */
     protected function getModel() {
         $model = $this->getCFGDef('form', 'model', 'Comments\\Comments');
-        
+
         return new $model($this->modx);
     }
 

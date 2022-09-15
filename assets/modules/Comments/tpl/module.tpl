@@ -219,6 +219,25 @@
         a.guest {
             color:blue;
         }
+        .attachments .attachment {
+            width:150px;
+            height:150px;
+            display:inline-block;
+            margin:0 15px 15px 0;
+            padding:5px;
+            border:1px solid #eee;
+            text-align: center;
+            position:relative;
+        }
+        .attachments .attachment img {
+            max-width:100%;
+            max-height:100%;
+        }
+        .attachments .attachment .controls .attachment-delete{
+            position:absolute;
+            right:0;
+            top:0;
+        }
     </style>
 </head>
 <body>

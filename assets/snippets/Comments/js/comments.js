@@ -1,4 +1,4 @@
-(function (window, $) {
+(function (window, $, FileAPI) {
     function Comments(options) {
         var defaults = {
             connector: 'assets/snippets/Comments/ajax.php',
@@ -18,6 +18,7 @@
             dislikeCountClass: 'dislike-count',
             likeBtnClass: 'like',
             dislikeBtnClass: 'dislike',
+            fileDeleteBtnClass: 'attachment-delete',
             subscribeWrapperClass: 'comments-subscription',
             formWrapperClass: 'comments-form-wrap',
             captchaWrapperClass: 'captcha-wrapper',
@@ -47,7 +48,11 @@
                 yes: 'Да',
                 no: 'Нет',
                 remove_confirm: 'Комментарий и все ответы на него будут безвозвратно удалены. Продолжить?'
-            }
+            },
+            uploader: false,
+            allowedImages: ['jpg', 'jpeg', 'gif', 'png', 'svg'],
+            maxImageSize: 10 * 1024 * 1024,
+            uploaderClass: 'uploader'
         };
         this._options = $.extend({}, defaults, options);
         this._options = $.extend(this._options, {
@@ -73,6 +78,8 @@
             editBtn: '.' + this._options.editBtnClass,
             likeBtn: '.' + this._options.likeBtnClass,
             dislikeBtn: '.' + this._options.dislikeBtnClass,
+            fileDeleteBtn: '.' + this._options.fileDeleteBtnClass,
+            uploaderArea: '.' + this._options.uploaderClass
         });
         if (typeof window.commentsLexicon === 'object') {
             this._options.lexicon = window.commentsLexicon;
@@ -213,12 +220,101 @@
                 $(self._options.previewWrapper, self._options.formWrapper).remove();
                 var form = $('form', self._options.formWrapper);
                 self.preview(form);
+            }).on('click', self._options.fileDeleteBtn, function(e){
+                e.preventDefault();
+                var attachment = $(this).parents('.attachment');
+                self.deleteAttachment(attachment);
             });
             this.loadData(form);
+            if (self._options.uploader) {
+                var placeholder = $(self._options.uploaderArea, form);
+                window.FileAPI.event.dnd(placeholder.get(0), function (over) {
+                    if (over) {
+                        placeholder.addClass('dnd');
+                    } else {
+                        placeholder.removeClass('dnd');
+                    }
+                }, function (files) {
+                    window.FileAPI.filterFiles(files, function (file) {
+                        var ext = file.name.split('.').pop();
+                        return self._options.allowedImages.includes(ext);
+                    }, function (files) {
+                        self.uploadAttachments(placeholder, files);
+                    });
+                });
+            }
             if (typeof self._options.onInitFormCallback === 'function') {
                 setTimeout(function () {
                     self._options.onInitFormCallback(self);
                 }, 0);
+            }
+            /*
+            FileAPI.event.on(upload[0], 'change', function (evt){
+                var files = FileAPI.getFiles(evt); // Retrieve file list
+                FileAPI.filterFiles(files, function (file){
+                    console.log(file.type);
+                    return /jpeg|gif|png$/.test(file.type);
+                }, function (files){
+                    uploader.upload(files);
+                });
+            })
+            */
+        },
+        uploadAttachments: function(placeholder, files) {
+            var self = this;
+            if( files.length ){
+                var options = {
+                    url: self._options.connector,
+                    files: { file: files },
+                    data: {
+                        action: 'uploadAttachment'
+                    },
+                    upload: function() {
+                        //uploadBtn.addClass('disabled');
+                        //progress.show();
+                    },
+                    progress: function (evt){
+                        //var pr = evt.loaded/evt.total * 100;
+                        //progress.css('width',pr+'%');
+                    },
+                    filecomplete: function (err, xhr){
+                        //progress.css('width', 0).hide();
+                        //uploadBtn.removeClass('disabled');
+                        //uploader.clear();
+                        if (!err) {
+                            var response = JSON.parse(xhr.response);
+                            if (response.status !== undefined && response.status == true) {
+                                placeholder.append(response.attachment);
+                            } else {
+                                self.alert('error', response.messages);
+                            }
+                        }
+                    },
+                };
+                window.FileAPI.upload(options);
+            }
+        },
+        deleteAttachment: function(attachment) {
+            var self = this;
+            var id = $('input[name="attachment[]"]').val();
+            if (id !== '') {
+                var data = {
+                    action: 'deleteAttachment',
+                    id: id
+                };
+                $.post(self._options.connector,
+                    data,
+                    function (response) {
+                        if (response.status) {
+                            attachment.remove();
+                        } else {
+                            self.alert('error', response.messages);
+                        }
+                    },
+                    'json'
+                ).fail(function (xhr) {
+                    self.handleAjaxError(xhr);
+                });
             }
         },
         updateCaptcha: function (captcha, form) {
@@ -743,6 +839,34 @@
             if (typeof this._options.lexicon[key] !== 'undefined') {
                 return this._options.lexicon[key];
             }
+        },
+        uploader: {
+            upload: function(files) {
+
+            },
+            clear: function() {
+                upload.replaceWith(upload = upload.clone( true ));
+            },
+            delete: function() {
+                var file = tv.val();
+                $.post(
+                    settings.siteUrl+'assets/tvs/FastImage/ajax.php',
+                    {
+                        mode:'delete',
+                        file:file,
+                        class:settings.classname,
+                        documentData: settings.documentData
+                    },
+                    function(data) {
+                        data = JSON.parse(data);
+                        if (data.success !== undefined && data.success == true) {
+                            tv.val('');
+                            $('.fi-image', placeholder).attr('src', settings.siteUrl + 'assets/tvs/FastImage/images/noimage.png');
+                            deleteBtn.addClass('disabled');
+                        }
+                    }
+                );
+            },
         }
     };
     window.Comments = Comments;

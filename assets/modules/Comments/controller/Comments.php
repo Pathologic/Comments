@@ -2,6 +2,7 @@
 
 use APIhelpers;
 use Comments\Comments as CommentsModel;
+use Comments\Files;
 use Comments\Module\CommentsDocLister;
 use DocumentParser;
 use Helpers\Lexicon;
@@ -144,6 +145,18 @@ class Comments
         }
     }
 
+    public function deleteAttachment()
+    {
+        $id = (int)$this->getRequest('id', 0, 'is_numeric');
+        if ($id) {
+            $files = new Files($this->modx);
+            $files->deleteFiles($id);
+            $this->setResult(['status' => true]);
+        } else {
+            $this->setResult(false, $this->lexicon->get('actions.error_attachment_remove'));
+        }
+    }
+
     public function create ()
     {
         $thread = (int)$this->getRequest('thread', 0, 'is_numeric');
@@ -224,7 +237,7 @@ class Comments
         return $this->result;
     }
 
-    public static function flPrepare ($modx, $data, $FormLister)
+    public static function flPrepare ($modx, $data, $FormLister, $name)
     {
         $comments = $FormLister->comments;
         if ($FormLister->getMode() == 'edit' && $comments->getID()) {

@@ -27,6 +27,14 @@
         <textarea class="form-control" id="comment" placeholder="Напишите сообщение" rows="10" name="comment">{{ data.comment }}</textarea>
         {{ plh['comment.error'] | raw }}
     </div>
+    {% if FormLister.getCFGDef('attachImages') %}
+    <div>Перетащите файлы в это поле</div>
+    <div class="uploader">
+        {% for item in data.attachments %}
+            {% include('Forms/attachment.tpl') with {data: item} %}
+        {% endfor %}
+    </div>
+    {% endif %}
     <div class="text-right"><button class="btn comment-reply-cancel btn-info btn-lg">Отменить</button> <button class="btn btn-warning btn-lg" type="submit">Отправить</button> <button class="btn comment-preview btn-secondary btn-lg">Просмотр</button></div>
 </form>
 {% endif %}

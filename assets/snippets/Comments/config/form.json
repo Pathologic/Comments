@@ -2,6 +2,7 @@
   "templatePath": "assets/snippets/Comments/tpl/",
   "templateExtension": "tpl",
   "formTpl": "@T_FILE:Forms/form",
+  "attachmentTpl": "@T_FILE:Forms/attachment",
   "disableSubmit": 1,
   "disableGuests": 1,
   "useCaptchaForGuestsOnly": 1,

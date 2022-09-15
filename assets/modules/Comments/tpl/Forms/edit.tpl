@@ -90,4 +90,23 @@
             {% endif %}
         </div>
     </div>
+    {% if data.attachments %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <p><br><b>Файлы</b></p>
+            </div>
+            <div class="attachments col-md-12">
+                {% for item in data.attachments %}
+                    <div class="attachment">
+                        <a href="{{ constant('MODX_SITE_URL') ~ item.file }}" target="_blank"><img src="{{ constant('MODX_SITE_URL') ~ item.thumb }}"></a>
+                        <div class="controls">
+                            <a href="#" class="attachment-delete btn btn-sm btn-danger" data-id="{{ item.id }}"><i class="fa fa-trash"></i></a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </form>

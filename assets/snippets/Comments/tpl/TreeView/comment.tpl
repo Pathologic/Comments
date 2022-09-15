@@ -29,6 +29,16 @@
             {% if data.updatedon %}
                 <div class="small">{{ DocLister.translate('edited_by') }} {{ editor.name }} {{ data.updatedon | date(DocLister.translate('dateFormat')) }}</div>
             {% endif %}
+            {% if data.attachments %}
+            <div class="attachments">
+                <p><small><b>Вложения</b>:</small></p>
+                {% for item in data.attachments %}
+                    <div class="attachment">
+                        <img class="img-responsive" src="{{ item.file }}">
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
         {% if DocLister.isModerator() %}
         <div class="comment-moderation">

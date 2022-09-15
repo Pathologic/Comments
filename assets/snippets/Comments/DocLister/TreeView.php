@@ -389,6 +389,7 @@ class TreeViewDocLister extends DocLister
                     continue;
                 }
                 $item['classes'] = $this->getClasses($item);
+                $item['attachments'] = [];
                 $this->_docs[$item[$pk]] = $item;
             }
             $this->loadExtender('user');
@@ -406,7 +407,14 @@ class TreeViewDocLister extends DocLister
                     $this->_docs[$key] += $value;
                 }
             }
-
+            $ids = array_keys($this->_docs);
+            if ($ids) {
+                $ids = implode(',', $ids);
+                $q = $this->dbQuery("SELECT `f`.*, `a`.`comment` FROM {$this->getTable('comments_files')} `f` LEFT JOIN {$this->getTable('comments_attachments')} `a` ON `f`.`id` = `a`.`attachment` AND `a`.`comment` IN ({$ids}) WHERE NOT ISNULL(`a`.`comment`)");
+                while ($row = $this->modx->db->getRow($q)) {
+                    $this->_docs[$row['comment']]['attachments'][$row['id']] = $row;
+                }
+            }
             $this->order = $this->buildFlatTree();
             $this->extCache->save($this->_docs, 'comments_data' . ($this->isModerator() ? '_moderation' : ''));
             $this->extCache->save($this->relations, 'comments_relations');

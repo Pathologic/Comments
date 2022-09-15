@@ -37,10 +37,16 @@ class Plugin
     }
 
     public function OnWebDeleteUser () {
-        $userid = (int)$userid;
+        $userid = (int)$this->modx->event->params['userid'];
         if ($userid) {
             $this->modx->db->query("DELETE FROM {$this->modx->getFullTableName('comments_lastview')} WHERE  `uid` IN ({$userid})");
             $this->modx->db->query("DELETE FROM {$this->modx->getFullTableName('comments_subscriptions')} WHERE `uid` IN ({$userid})");
         }
+    }
+
+    public function OnSiteRefresh() {
+        $ttl = (int)$this->modx->event->params['ttl'] ?? 24;
+        $files = new Files($this->modx);
+        $files->deleteLostFiles($ttl);
     }
 }

@@ -5,7 +5,7 @@
  * Comments management
  * 
  * @category	module
- * @version 	1.3.1
+ * @version 	1.4.0
  * @internal	@properties
  * @internal	@modx_category Manager and Admin
  * @internal    @installset base, sample

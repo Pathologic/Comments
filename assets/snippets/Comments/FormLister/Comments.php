@@ -147,6 +147,7 @@ class Comments extends Core
             $this->addMessage($this->translate('comments.only_users_can_edit'));
         } elseif ($this->comments->getID()) {
             $fields = $this->comments->toArray();
+            $fields['attachments'] = $this->comments->getAttachments();
             if ($managerMode) {
                 $flag = true;
             } elseif ($fields['createdby'] != $uid || $fields['deleted'] || !$fields['published']) {
@@ -224,11 +225,15 @@ class Comments extends Core
             }
             if (!empty($context) && $thread) {
                 $result = $this->comments->create($fields)->save(true, true);
+                if ($result && $this->getCFGDef('attachImages')) {
+                    $this->comments->saveAttachments($result, $this->getField('attachment', []));
+                }
             }
         }
         $extMessages = $this->addMessagesFromModel();
         if ($result) {
             $this->setFields($this->comments->toArray());
+            $this->setField('attachments', $this->comments->getAttachments());
             $this->setFormStatus(true);
             $this->saveFormFields();
             if (empty($this->getCFGDef('successTpl')) && !$extMessages) {
@@ -261,11 +266,15 @@ class Comments extends Core
                 $fields['updatedby'] = $uid;
             }
             $result = $this->comments->fromArray($fields)->save(true, true);
+            if ($result && !$this->isManagerMode()) {
+                $this->comments->saveAttachments($result, $this->getField('attachment', []));
+            }
         }
         if ($result) {
             $this->setFormStatus(true);
             $this->setFields($this->comments->toArray());
             $this->setField('comment', $this->comments->get('content'));
+            $this->setField('attachments', $this->comments->getAttachments());
             if (empty($this->getCFGDef('successTpl'))) {
                 $this->addMessage($this->translate('comments.comment_saved'));
             }

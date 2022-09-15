@@ -2,6 +2,7 @@
 
 use APIhelpers;
 use Comments\Traits\Messages;
+use Comments\Traits\Attachments;
 use Exception;
 use autoTable;
 use Doctrine\Common\Cache\Cache;
@@ -17,6 +18,7 @@ class Comments extends autoTable
 {
     use Messages;
     use ExtendedFields;
+    use Attachments;
     protected $tree_table = 'comments_tree';
     protected $table = 'comments';
     protected $guests_table = 'comments_guests';
@@ -61,7 +63,7 @@ class Comments extends autoTable
      */
     public function beginTransaction ()
     {
-        $this->modx->db->begin();
+        $this->modx->db->begin(null, 'comments');
 
         return true;
     }
@@ -71,7 +73,7 @@ class Comments extends autoTable
      */
     public function rollbackTransaction ()
     {
-        return $this->modx->db->rollback();
+        return $this->modx->db->rollback(null, 'comments');
 
         return true;
     }
@@ -81,7 +83,7 @@ class Comments extends autoTable
      */
     public function commitTransaction ()
     {
-        return $this->modx->db->commit();
+        return $this->modx->db->commit(null, 'comments');
 
         return true;
     }
@@ -154,6 +156,7 @@ class Comments extends autoTable
             WHERE `t`.`idDescendant`=`t`.`idAncestor` AND `c`.`id`={$id}");
             $this->fromArray($this->modx->db->getRow($result));
             $this->fromArray($this->loadExtendedFields($id));
+            $this->loadAttachments($id);
             $this->store($this->toArray());
             $this->id = $this->eraseField($this->pkName);
             if (is_bool($this->id) && $this->id === false) {
@@ -759,7 +762,7 @@ class Comments extends autoTable
     {
         $this->modx->db->query("
             CREATE TABLE IF NOT EXISTS {$this->makeTable($this->table)} (
-            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `id` int(11) AUTO_INCREMENT,
             `thread` int(11) NOT NULL,
             `context` varchar(255) NOT NULL DEFAULT 'site_content',
             `createdby` int(11) NOT NULL DEFAULT 0,
@@ -780,7 +783,7 @@ class Comments extends autoTable
         ");
         $this->modx->db->query("
             CREATE TABLE IF NOT EXISTS {$this->makeTable('comments_guests')} (
-            `id` int(11) NOT NULL,
+            `id` int(11),
             `name` varchar(255) NOT NULL DEFAULT '',
             `email` varchar(255) NOT NULL DEFAULT '',
             PRIMARY KEY (`id`),
@@ -823,6 +826,23 @@ class Comments extends autoTable
             ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
+        $files = new Files($this->modx);
+        $files->createTable();
+        $this->modx->db->query("
+            CREATE TABLE IF NOT EXISTS {$this->makeTable($this->attachments_table)} (
+            `comment` int(11) NOT NULL,
+            `attachment` int(11) NOT NULL,
+            UNIQUE KEY `main` (`comment`, `attachment`),
+            CONSTRAINT `comments_attachments_ibfk_1`
+            FOREIGN KEY (`comment`)
+            REFERENCES {$this->makeTable($this->table)} (`id`)
+            ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `comments_attachments_ibfk_2`
+            FOREIGN KEY (`attachment`)
+            REFERENCES {$this->makeTable($this->files_table)} (`id`)
+            ON DELETE CASCADE ON UPDATE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ");
         $this->query("
             INSERT IGNORE INTO {$this->makeTable('system_eventnames')} (`name`, `groupname`) VALUES
             ('OnBeforeCommentSave', 'Comments Events'),
@@ -833,6 +853,10 @@ class Comments extends autoTable
             ('OnCommentsPublish', 'Comments Events'),
             ('OnBeforeCommentsUnpublish', 'Comments Events'),
             ('OnCommentsUnpublish', 'Comments Events'),
+            ('OnBeforeCommentsAttachmentUpload', 'Comments Events'),
+            ('OnCommentsAttachmentUpload', 'Comments Events'),
+            ('OnBeforeCommentsAttachmentRemove', 'Comments Events'),
+            ('OnCommentsAttachmentRemove', 'Comments Events'),
             ('OnBeforeCommentsRemove', 'Comments Events'),
             ('OnCommentsRemove', 'Comments Events')
         ");

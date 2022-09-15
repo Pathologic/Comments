@@ -296,7 +296,7 @@
         },
         deleteAttachment: function(attachment) {
             var self = this;
-            var id = $('input[name="attachment[]"]').val();
+            var id = $('input[name="attachment[]"]', attachment).val();
             if (id !== '') {
                 var data = {
                     action: 'deleteAttachment',

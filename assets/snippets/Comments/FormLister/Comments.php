@@ -219,7 +219,7 @@ class Comments extends Core
             $fields['thread'] = $thread;
             $fields['context'] = $context;
             if ($managerMode) {
-                $fields['createdby'] = -1;
+                $fields['createdby'] = class_exists('EvolutionCMS\Core') ? $this->modx->getLoginUserID('mgr') : -1;
             } else {
                 $fields['createdby'] = $uid;
             }

@@ -5,6 +5,7 @@ namespace Comments;
 class Files extends \autoTable
 {
     protected $table = 'comments_files';
+    protected $attachments_table = 'comments_attachments';
     protected $fs;
     protected $default_field = [
         'file'      => '',
@@ -86,8 +87,6 @@ class Files extends \autoTable
         return $this->modx->stripAlias($filename).'.'.$ext;
     }
 
-
-
     public function generateRandomString($length = 32)
     {
         if (function_exists('random_bytes')) {
@@ -127,7 +126,9 @@ class Files extends \autoTable
 
     public function deleteFiles($ids, $fire_events = true)
     {
-        $_ids = $this->cleanIDs($ids);
+        $_ids = implode(',', $this->cleanIDs($ids));
+        if (!$_ids) return;
+
         $result = $this->query("SELECT * FROM {$this->makeTable($this->table)} WHERE `id` IN ({$_ids})");
 
         while($row = $this->modx->db->getRow($result)) {

@@ -217,7 +217,7 @@ class TreeViewDocLister extends DocLister
             if (isset($item['editable'])) {
                 $item['classes'][] = $this->getCFGDef('editableClass', 'editable');
             }
-            if ($item['published'] && !$item['deleted']) {
+            if ($this->isModerator() || ($item['published'] && !$item['deleted'])) {
                 $count++;
             }
             if($trackNew && $lastView !== false && $item['id'] > $lastView) {

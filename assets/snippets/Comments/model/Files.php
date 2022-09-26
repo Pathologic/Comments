@@ -158,7 +158,7 @@ class Files extends \autoTable
         $ttl = (int)$ttl;
         if ($ttl) {
             $date = date('Y-m-d H:i:s', strtotime("-{$ttl} hours"));
-            $q = $this->query("SELECT `f`.`id` FROM {$this->makeTable($this->files_table)} `f` LEFT JOIN {$this->makeTable($this->attachments_table)} `a` ON `f`.`id` = `a`.`attachment` WHERE ISNULL(`a`.`comment`) AND `createdon` < '{$date}'");
+            $q = $this->query("SELECT `f`.`id` FROM {$this->makeTable($this->table)} `f` LEFT JOIN {$this->makeTable($this->attachments_table)} `a` ON `f`.`id` = `a`.`attachment` WHERE ISNULL(`a`.`comment`) AND `createdon` < '{$date}'");
             $ids = $this->modx->db->getColumn('id', $q);
             $this->deleteFiles($ids);
         }

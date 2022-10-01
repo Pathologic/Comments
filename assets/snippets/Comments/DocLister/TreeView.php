@@ -302,7 +302,11 @@ class TreeViewDocLister extends DocLister
         foreach ($this->relations as $parent => $children) {
             foreach ($children as $id) {
                 if (isset($this->_docs[$id])) {
-                    $out[$parent] .= $this->parseChunk($tpl, $this->_docs[$id]);
+                    if (isset($out[$parent])) {
+                        $out[$parent] .= $this->parseChunk($tpl, $this->_docs[$id]);
+                    } else {
+                        $out[$parent] = $this->parseChunk($tpl, $this->_docs[$id]);
+                    }
                 }
             }
         }

@@ -4,6 +4,7 @@ use APIhelpers;
 use Comments\Traits\Messages;
 use Doctrine\Common\Cache\Cache;
 use DocumentParser;
+use Illuminate\Contracts\Foundation\Application;
 
 /**
  * Class Rating
@@ -235,7 +236,8 @@ class Rating {
      */
     public function dropCache ($thread = 0, $context = '')
     {
-        if (isset($this->modx->cache) && ($this->modx->cache instanceof Cache)) {
+        if ((isset($this->modx->cache) || ($this->modx instanceof Application && $this->modx->offsetExists('cache'))) 
+            && $this->modx->cache instanceof Cache) {
             if ($thread && $context) {
                 $key = $context . '_' . $thread . '_comments_rating';
                 $this->modx->cache->delete($key);

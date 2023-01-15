@@ -272,7 +272,7 @@ class Comments extends autoTable
                         $this->eraseField('deletedby');
                     }
                 }
-                $out = parent::save($fire_events, $clearCache);
+                $out = parent::save($fire_events, false);
                 if ($out) {
                     if ($this->isChanged('deleted') && !$this->get('deleted')) {
                         $this->query("UPDATE {$this->makeTable($this->table)} SET `deletedon`=null WHERE `id`={$out}");

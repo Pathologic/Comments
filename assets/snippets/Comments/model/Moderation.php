@@ -53,7 +53,7 @@ class Moderation
     public function hasPermission ($permission = '')
     {
         if (class_exists('EvolutionCMS\Core')) {
-			$out = $this->modx->hasPermission($permission);
+	    $out = $this->modx->hasPermission($permission);
         } else {
             $out = !empty($_SESSION['usrPermissions']) && is_array($_SESSION['usrPermissions']) && in_array($permission, $_SESSION['usrPermissions']);
         }

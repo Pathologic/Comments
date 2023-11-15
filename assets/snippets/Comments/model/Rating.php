@@ -71,7 +71,7 @@ class Rating {
         $uid = (int)$this->modx->getLoginUserID('web');
         if ($uid && $this->getComment($commentId) && (int)$this->comment->get('createdby') !== $uid && !$this->isVoted($commentId)) {
             $result = $this->modx->invokeEvent('OnBeforeCommentVote', [
-                'vote'    => 'dislike',
+                'vote'    => 'like',
                 'comment' => $this->comment
             ], $fire_events);
             if (!empty($result)) {
@@ -84,7 +84,7 @@ class Rating {
             }
             if ($out) {
                 $result = $this->modx->invokeEvent('OnCommentVote', [
-                    'vote'    => 'dislike',
+                    'vote'    => 'like',
                     'comment' => $this->comment
                 ], $fire_events);
                 if (!empty($result)) {
